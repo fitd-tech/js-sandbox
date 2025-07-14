@@ -1,5 +1,7 @@
 # js-sandbox
 
+This is a repo meant to explore JavaScript, React, TypeScript, and other related concepts. Because many of the exercises here may be hardware intensive, this is meant to be run locally as opposed to hosting on a paid service.
+
 To run the frontend server:
 
 ```
