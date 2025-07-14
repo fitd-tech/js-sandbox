@@ -1,7 +1,7 @@
-import createList from "./list";
+import createList from './list'
 
-describe("createList", () => {
-  test("creates a list of requested length", () => {
-    expect(createList(100).length).toBe(100);
-  });
-});
+describe('createList', () => {
+    test('creates a list of requested length', () => {
+        expect(createList(100).length).toBe(100)
+    })
+})
