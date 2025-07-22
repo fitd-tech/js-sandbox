@@ -1,60 +1,60 @@
 // https://en.wikipedia.org/wiki/Heap_(data_structure)
 
 enum HeapTypes {
-    MIN,
-    MAX,
+  MIN,
+  MAX,
 }
 
 export class Heap {
-    array = []
-    type = HeapTypes.MAX
+  array = []
+  type = HeapTypes.MAX
 
-    constructor(array, type) {
-        if (array) {
-            this.array = array
-        }
-
-        if (type) {
-            this.type = type
-        }
+  constructor(array, type) {
+    if (array) {
+      this.array = array
     }
 
-    // BASIC
+    if (type) {
+      this.type = type
+    }
+  }
 
-    findMax() {}
+  // BASIC
 
-    insert() {}
+  findMax() {}
 
-    extractMax() {}
+  insert() {}
 
-    deleteMax() {}
+  extractMax() {}
 
-    replace() {}
+  deleteMax() {}
 
-    // CREATION
+  replace() {}
 
-    createHeap() {}
+  // CREATION
 
-    heapify() {}
+  createHeap() {}
 
-    merge() {}
+  heapify() {}
 
-    meld() {}
+  merge() {}
 
-    // INSPECTION
+  meld() {}
 
-    size() {}
+  // INSPECTION
 
-    isEmpty() {}
+  size() {}
 
-    // INTERNAL
+  isEmpty() {}
 
-    // Performs increase-key if a max-heap or decrease-key if a min-heap
-    incrementKey() {}
+  // INTERNAL
 
-    delete() {}
+  // Performs increase-key if a max-heap or decrease-key if a min-heap
+  incrementKey() {}
 
-    siftUp() {}
+  delete() {}
 
-    siftDown() {}
+  siftUp() {}
+
+  siftDown() {}
 }

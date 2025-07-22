@@ -18,26 +18,26 @@ const router = createRouter({ routeTree })
 
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
-    interface Register {
-        router: typeof router
-    }
+  interface Register {
+    router: typeof router
+  }
 }
 
 const darkTheme = createTheme({
-    palette: {
-        mode: 'dark',
-    },
+  palette: {
+    mode: 'dark',
+  },
 })
 
 // Render the app
 const rootElement = document.getElementById('root')!
 if (!rootElement.innerHTML) {
-    const root = createRoot(rootElement)
-    root.render(
-        <StrictMode>
-            <ThemeProvider theme={darkTheme}>
-                <RouterProvider router={router} />
-            </ThemeProvider>
-        </StrictMode>
-    )
+  const root = createRoot(rootElement)
+  root.render(
+    <StrictMode>
+      <ThemeProvider theme={darkTheme}>
+        <RouterProvider router={router} />
+      </ThemeProvider>
+    </StrictMode>
+  )
 }
