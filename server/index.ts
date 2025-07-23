@@ -115,8 +115,8 @@ function buildHeapResponse(req, res, heapFunc) {
     }
     res.status(400).json(errorData)
   } else {
-    const heap = heapFunc()
-    savedHeapArray = heap.array
+    heapFunc()
+    savedHeapArray = savedHeap.array // DEV: Do we need to save the array?
     const data = {
       heap: savedHeapArray,
     }
@@ -129,9 +129,25 @@ app.post('/heap/heapify', (req, res) => {
   console.log('someone hit /heap/heapify')
   function heapify() {
     savedHeap = new Heap(savedList, HEAP_TYPES.MIN)
-    return savedHeap
+    // return savedHeap // DEV: Do we need to return this?
   }
   buildHeapResponse(req, res, heapify)
+})
+
+app.post('/heap/insert', (req, res) => {
+  console.log('someone hit /heap/insert')
+  const { value } = req.body
+  if (value === undefined || Number.isNaN(value)) {
+    const errorData = {
+      error: 'Please submit a numeric value to insert.',
+    }
+    res.status(400).json(errorData)
+  } else {
+    function insert() {
+      savedHeap.insert(value)
+    }
+    buildHeapResponse(req, res, insert)
+  }
 })
 
 app.listen(port, () => {

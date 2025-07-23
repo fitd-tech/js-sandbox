@@ -1,11 +1,24 @@
 import { useMemo, useCallback, useState } from 'react'
-import { Alert, CircularProgress, Typography } from '@mui/material'
+import {
+  Alert,
+  Button,
+  CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  FormControl,
+  TextField,
+  Typography,
+} from '@mui/material'
 import { createFileRoute } from '@tanstack/react-router'
-import ActionPanel from '../components/ActionPanel.tsx'
+import ActionPanel, {
+  type ActionPanelButtons,
+} from '../components/ActionPanel.tsx'
 import { endpoints } from '../constants.ts'
 import HeapInfo from '../components/HeapInfo.tsx'
 
-const LIST_SIZE = 31
+// const LIST_SIZE = 31
 const PAGE_SIZE = 31
 
 /* const DEV_MOCK_HEAP_ARRAY = [
@@ -87,20 +100,48 @@ function HeapNode({ label }: HeapNodeProps) {
 ) */
 
 function Heap() {
-  const [unsortedHeap, setUnsortedHeap] = useState([])
+  const [previousHeap, setPreviousHeap] = useState([])
   const [currentHeap, setCurrentHeap] = useState([])
+  const [hasHeapified, setHasHeapified] = useState(false)
+  const [isGetListDialogOpen, setIsGetListDialogOpen] = useState(false)
+  const [listSize, setListSize] = useState('')
+  const [isInsertValueDialogOpen, setIsInsertValueDialogOpen] = useState(false)
+  const [valueToInsert, setValueToInsert] = useState('')
   const [isLoadingUnsortedHeap, setIsLoadingUnsortedHeap] = useState(false)
   const [isLoadingCurrentHeap, setIsLoadingCurrentHeap] = useState(false)
   const [actionName, setActionName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  console.log('listSize', listSize)
 
-  async function getList() {
+  let isListSizeValid: boolean = true
+  const isListSizeNumber = !Number.isNaN(listSize)
+  if (listSize) {
+    isListSizeValid =
+      isListSizeNumber && Number(listSize) >= 0 && Number(listSize) <= 31
+  }
+  console.log('isListSizeValid', isListSizeValid)
+
+  let isValueToInsertValid: boolean = true
+  const isValueToInsertNumber = !Number.isNaN(valueToInsert)
+  if (valueToInsert) {
+    isValueToInsertValid =
+      isValueToInsertNumber &&
+      Number(valueToInsert) >= -1000 &&
+      Number(valueToInsert) <= 1000
+  }
+  console.log('isValueToInsertValid', isValueToInsertValid)
+
+  async function getList(event?: React.FormEvent<HTMLFormElement>) {
+    event?.preventDefault()
+    if (!isListSizeValid) {
+      return
+    }
+    setIsGetListDialogOpen(false)
     setError(null)
     setIsLoadingUnsortedHeap(true)
-    setCurrentHeap([])
     setActionName(null)
     const data = {
-      listSize: LIST_SIZE,
+      listSize,
       pageSize: PAGE_SIZE,
     }
     const response = await fetch(
@@ -117,7 +158,9 @@ function Heap() {
       const responseJson = await response.json()
       const { list } = responseJson
       console.log('list from getList', list)
-      setUnsortedHeap(list)
+      setPreviousHeap(list)
+      setCurrentHeap([])
+      setHasHeapified(false)
     } else {
       const responseJson = await response.json()
       setError(responseJson.error)
@@ -125,38 +168,52 @@ function Heap() {
     setIsLoadingUnsortedHeap(false)
   }
 
-  async function getUpdatedHeap(endpoint: string) {
-    setIsLoadingCurrentHeap(true)
-    const data = {
-      pageSize: PAGE_SIZE,
-    }
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+  const getUpdatedHeap = useCallback(
+    async (endpoint: string, payload?: Record<string, string | number>) => {
+      setIsLoadingCurrentHeap(true)
+      const data = {
+        pageSize: PAGE_SIZE,
+        ...(payload || {}),
       }
-    )
-    const { heap } = await response.json()
-    console.log('heap from getUpdatedHeap response', heap)
-    setCurrentHeap(heap)
-    setIsLoadingCurrentHeap(false)
-  }
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+      const { heap } = await response.json()
+      console.log('heap from getUpdatedHeap response', heap)
+      // We need the user to heapify first. This populates the "Current heap" panel and allows other operations to complete successfully.
+      if (endpoint !== endpoints.heap.heapify) {
+        setPreviousHeap(currentHeap)
+      } else {
+        setHasHeapified(true)
+      }
+      setCurrentHeap(heap)
+      setIsLoadingCurrentHeap(false)
+    },
+    [currentHeap]
+  )
 
-  // DEV: Allow user to choose MIN or MAX
   const handleClickGetList = useCallback(() => {
-    getList()
+    setIsGetListDialogOpen(true)
   }, [])
 
   const handleClickHeapify = useCallback(() => {
-    getUpdatedHeap(endpoints.heapify)
+    getUpdatedHeap(endpoints.heap.heapify)
     setActionName('heapify')
+  }, [getUpdatedHeap])
+
+  const handleClickInsert = useCallback(() => {
+    setIsInsertValueDialogOpen(true)
   }, [])
 
-  const buttonConfig = useMemo(
+  const buttonConfig: ActionPanelButtons = useMemo(
+    // DEV: This type isn't enforcing that unlisted object keys shouldn't be present
     () => [
       {
         label: 'Get Raw Heap',
@@ -165,13 +222,25 @@ function Heap() {
       {
         label: 'Heapify',
         onClick: handleClickHeapify,
+        disabled: !previousHeap.length || hasHeapified,
+      },
+      {
+        label: 'Insert',
+        onClick: handleClickInsert,
+        disabled: !hasHeapified,
       },
       {
         label: 'Home',
         to: '/',
       },
     ],
-    [handleClickGetList, handleClickHeapify]
+    [
+      handleClickGetList,
+      handleClickHeapify,
+      handleClickInsert,
+      hasHeapified,
+      previousHeap.length,
+    ]
   )
 
   function renderHeap(heapArray: string[] | number[], isLoading: boolean) {
@@ -194,13 +263,18 @@ function Heap() {
         firstColumnIndex,
         firstColumnIndex + columnsInCurrentRow
       )
-      renderArray.push(
-        <HeapRow key={columnsInCurrentRow}>
-          {columns.map((element, index) => (
-            <HeapNode key={index} label={element} />
-          ))}
-        </HeapRow>
-      )
+      // If we don't have enough elements to fill the current we have to push empty nodes for alignment purposes
+      // DEV: We can make empty nodes invisible
+      const populatedNodes = columns.map((element, index) => (
+        <HeapNode key={`node-${index}`} label={element} />
+      ))
+      // Create another array of empty nodes here (the difference between nodes.length and columnsInCurrentRow) and add it to nodes
+      const emptyNodes = []
+      for (let i = 0; i < columnsInCurrentRow - populatedNodes.length; i++) {
+        emptyNodes.push(<HeapNode key={`empty-node-${i}`} label={' '} />)
+      }
+      const nodes = [...populatedNodes, ...emptyNodes]
+      renderArray.push(<HeapRow key={columnsInCurrentRow}>{nodes}</HeapRow>)
       firstColumnIndex += columnsInCurrentRow
       columnsInCurrentRow *= 2
     }
@@ -222,10 +296,47 @@ function Heap() {
     <div className="heap-placeholder">
       <Typography variant="subtitle2">The heap is empty.</Typography>
       <Typography variant="subtitle2">
-        {unsortedHeap.length ? 'Choose a heap action!' : 'Click Get Raw Heap!'}
+        {previousHeap.length ? 'Choose a heap action!' : 'Click Get Raw Heap!'}
       </Typography>
     </div>
   )
+
+  // DEV: We can use a hook to provide these handlers
+  function handleChangeListSizeInput(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setListSize(event.target.value)
+  }
+
+  function handleCloseGetListDialog() {
+    setIsGetListDialogOpen(false)
+  }
+
+  function handleChangeInsertValueInput(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setValueToInsert(event.target.value)
+  }
+
+  const handleInsertHeapValue = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      if (!isValueToInsertValid) {
+        return
+      }
+      const payload = {
+        value: Number(valueToInsert),
+      }
+      await getUpdatedHeap(endpoints.heap.insert, payload) // DEV: We need to provide the value to insert here somehow
+      setActionName('insert')
+      setIsInsertValueDialogOpen(false)
+    },
+    [getUpdatedHeap, isValueToInsertValid, valueToInsert]
+  )
+
+  function handleCloseInsertValueDialog() {
+    setIsInsertValueDialogOpen(false)
+  }
 
   return (
     <>
@@ -234,7 +345,7 @@ function Heap() {
       </Typography>
       <ActionPanel buttonConfig={buttonConfig} column>
         <div>
-          <Typography variant="subtitle1">Unsorted heap</Typography>
+          <Typography variant="subtitle1">Previous heap</Typography>
           <div // DEV: This should be its own component, since it wraps this pane in the sort route as well
             style={{
               height: '300px', // DEV: The height and width are different between sort and heap here
@@ -251,8 +362,8 @@ function Heap() {
                 alignItems: 'center',
               }}
             >
-              {unsortedHeap.length
-                ? renderHeap(unsortedHeap, isLoadingUnsortedHeap)
+              {previousHeap.length
+                ? renderHeap(previousHeap, isLoadingUnsortedHeap)
                 : heapPlaceholder}
             </div>
           </div>
@@ -292,6 +403,70 @@ function Heap() {
           {error}
         </Alert>
       )}
+      <Dialog // DEV: This can be a generic dialog framework component with a nested form control select body component
+        open={isGetListDialogOpen}
+        onClose={handleCloseGetListDialog}
+        maxWidth="sm"
+        fullWidth
+        disableRestoreFocus // https://github.com/mui/material-ui/issues/33004#issuecomment-1455260156
+      >
+        <DialogTitle>Get Raw Heap</DialogTitle>
+        <DialogContent sx={{ paddingBottom: 0 }}>
+          <form onSubmit={getList}>
+            <FormControl fullWidth>
+              <TextField
+                autoFocus
+                required
+                id="list-size-input"
+                label="Enter an initial size for the heap"
+                variant="outlined"
+                helperText="Choose a number between 0 and 31."
+                onChange={handleChangeListSizeInput}
+                error={!!listSize && !isListSizeValid}
+                sx={{
+                  marginTop: '5px',
+                }}
+              />
+            </FormControl>
+            <DialogActions>
+              <Button onClick={handleCloseGetListDialog}>Cancel</Button>
+              <Button type="submit">Ok</Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
+      <Dialog
+        open={isInsertValueDialogOpen}
+        onClose={handleCloseInsertValueDialog}
+        maxWidth="sm"
+        fullWidth
+        disableRestoreFocus // https://github.com/mui/material-ui/issues/33004#issuecomment-1455260156
+      >
+        <DialogTitle>Insert a Value</DialogTitle>
+        <DialogContent sx={{ paddingBottom: 0 }}>
+          <form onSubmit={handleInsertHeapValue}>
+            <FormControl fullWidth>
+              <TextField
+                autoFocus
+                required
+                id="insert-value-input"
+                label="Enter a value to add to the heap"
+                variant="outlined"
+                helperText="Choose a number between -1000 and 1000."
+                onChange={handleChangeInsertValueInput}
+                error={!!valueToInsert && !isValueToInsertValid}
+                sx={{
+                  marginTop: '5px',
+                }}
+              />
+            </FormControl>
+            <DialogActions>
+              <Button onClick={handleCloseInsertValueDialog}>Cancel</Button>
+              <Button type="submit">Ok</Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
     </>
   )
 }

@@ -101,25 +101,58 @@ export class Heap {
   delete() {}
 
   siftUp(index) {
+    console.log('called siftUp')
     // Store the current index
     let currentIndex = index
+    console.log('currentIndex from siftUp', currentIndex)
     // Get the value of the current node
-    let currentValue = this.heapArray[currentIndex]
+    const currentValue = this.heapArray[currentIndex]
     // Get the parent of the current node
     let currentParent = this.getParent(currentIndex)
+    console.log('currentParent from siftUp', currentParent)
     // While the node has a parent and the parent value should be swapped with the node value, continue
-    const doesParentExist = currentParent.value
-    const shouldSwapParentAndChild = this.getShouldSwapValuesVertically(
-      currentParent.value,
-      currentValue
-    )
-    while (doesParentExist && shouldSwapParentAndChild) {
+    const getShouldSwapParentAndChild = () => {
+      const doesParentExist = currentParent.value !== undefined
+      console.log('doesParentExist from siftUp', doesParentExist)
+      console.log(
+        'currentParent.value from getShouldSwapParentAndChild in siftUp',
+        currentParent.value
+      )
+      console.log(
+        'currentValue from getShouldSwapParentAndChild in siftUp',
+        currentValue
+      )
+      const shouldSwapParentAndChild = this.getShouldSwapValuesVertically(
+        currentParent.value,
+        currentValue
+      )
+      console.log(
+        'shouldSwapParentAndChild from siftUp',
+        shouldSwapParentAndChild
+      )
+      return doesParentExist && shouldSwapParentAndChild
+    }
+    const DEBUG_ITERATION_LIMIT = 5
+    let debugIteration = 0
+    while (
+      getShouldSwapParentAndChild() &&
+      (!DEBUG_ITERATION_LIMIT || debugIteration < DEBUG_ITERATION_LIMIT)
+    ) {
+      console.log('currentValue from siftUp while loop', currentValue)
+      console.log('currentIndex from siftUp while loop', currentIndex)
+      console.log('currentParent from siftUp while loop', currentParent)
       // Swap the node value and the parent value
       this.swapElementValues(currentParent.index, currentIndex)
-      // Set the current index and value to the new parent index and value
-      currentValue = this.getParent(currentIndex).value
+      console.log(
+        'currentParent after swap from siftUp while loop',
+        currentParent
+      )
+      // Set the current index to the parent index (currentValue remains the same, as we are moving with it)
       currentIndex = currentParent.index
+      console.log('currentValue after swap in siftUp while loop', currentValue)
+      console.log('currentIndex after swap in siftUp while loop', currentIndex)
       currentParent = this.getParent(currentIndex)
+      debugIteration++
     }
     // Validate the heap
     this.validateHeap()
@@ -178,10 +211,10 @@ export class Heap {
       return shouldWhileContinue
     }
     const DEBUG_ITERATION_LIMIT = null
-    let iteration = 0
+    let debugIteration = 0
     while (
       getShouldWhileContinue() &&
-      (!DEBUG_ITERATION_LIMIT || iteration < DEBUG_ITERATION_LIMIT)
+      (!DEBUG_ITERATION_LIMIT || debugIteration < DEBUG_ITERATION_LIMIT)
     ) {
       // console.log('iteration from while loop', iteration)
       // console.log('currentIndex from while loop', currentIndex)
@@ -228,7 +261,7 @@ export class Heap {
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       }
-      iteration++
+      debugIteration++
     }
     console.log('this.validateHeap() from siftDown', this.validateHeap())
   }
@@ -245,7 +278,8 @@ export class Heap {
   }
 
   getParent(sourceIndex) {
-    const leftChildIndex = (sourceIndex - 1) / 2
+    // https://en.wikipedia.org/wiki/Binary_heap#Heap_implementation
+    const leftChildIndex = Math.floor((sourceIndex - 1) / 2)
     return this.getHeapElement(leftChildIndex)
   }
 

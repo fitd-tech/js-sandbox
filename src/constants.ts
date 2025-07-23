@@ -1,6 +1,9 @@
 export const endpoints = {
   list: '/list/',
-  heapify: '/heap/heapify/',
+  heap: {
+    heapify: '/heap/heapify/',
+    insert: '/heap/insert/',
+  },
   selectionSortIntuited: '/selection-sort/intuited/',
   bubbleSortIntuited: '/bubble-sort/intuited/',
   insertionSortIntuited: '/insertion-sort/intuited/',

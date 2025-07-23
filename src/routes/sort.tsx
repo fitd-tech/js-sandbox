@@ -337,10 +337,10 @@ function Sort() {
           </DialogContentText>
           <form onSubmit={getList}>
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Size</InputLabel>
+              <InputLabel id="list-size-select-label">Size</InputLabel>
               <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+                labelId="list-size-select-label"
+                id="list-size-select"
                 value={listSize}
                 label="Size"
                 onChange={handleChangeListSize}

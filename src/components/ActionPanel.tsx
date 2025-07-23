@@ -1,14 +1,17 @@
 import { Button } from '@mui/material'
 import { Link } from '@tanstack/react-router'
 
-interface ButtonData {
+type ButtonData = {
   label: string | React.ReactElement
   onClick?: () => void
   to?: string
+  disabled?: boolean
 }
 
+export type ActionPanelButtons = ButtonData[]
+
 interface ActionPanelProps {
-  buttonConfig?: ButtonData[]
+  buttonConfig?: ActionPanelButtons
   children?: React.ReactElement | React.ReactElement[] | string
   column?: boolean
 }
@@ -65,7 +68,11 @@ export default function ActionPanel({
               }
               return (
                 <div key={index}>
-                  <Button variant="outlined" onClick={button.onClick}>
+                  <Button
+                    variant="outlined"
+                    onClick={button.onClick}
+                    disabled={button.disabled}
+                  >
                     {button.label}
                   </Button>
                 </div>
