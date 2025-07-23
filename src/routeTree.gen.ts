@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SortRouteImport } from './routes/sort'
+import { Route as HeapRouteImport } from './routes/heap'
 import { Route as IndexRouteImport } from './routes/index'
 
 const SortRoute = SortRouteImport.update({
   id: '/sort',
   path: '/sort',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HeapRoute = HeapRouteImport.update({
+  id: '/heap',
+  path: '/heap',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +31,31 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/heap': typeof HeapRoute
   '/sort': typeof SortRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/heap': typeof HeapRoute
   '/sort': typeof SortRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/heap': typeof HeapRoute
   '/sort': typeof SortRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sort'
+  fullPaths: '/' | '/heap' | '/sort'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/sort'
-  id: '__root__' | '/' | '/sort'
+  to: '/' | '/heap' | '/sort'
+  id: '__root__' | '/' | '/heap' | '/sort'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HeapRoute: typeof HeapRoute
   SortRoute: typeof SortRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/sort'
       fullPath: '/sort'
       preLoaderRoute: typeof SortRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/heap': {
+      id: '/heap'
+      path: '/heap'
+      fullPath: '/heap'
+      preLoaderRoute: typeof HeapRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HeapRoute: HeapRoute,
   SortRoute: SortRoute,
 }
 export const routeTree = rootRouteImport

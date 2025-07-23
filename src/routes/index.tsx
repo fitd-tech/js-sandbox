@@ -8,8 +8,13 @@ export const Route = createFileRoute('/')({
 
 function Index() {
   return (
-    <Link href="/sort">
-      <Typography variant="h5">Sorting Algorithms</Typography>
-    </Link>
+    <>
+      <Link href="/heap">
+        <Typography variant="h5">Heap Data Structure</Typography>
+      </Link>
+      <Link href="/sort">
+        <Typography variant="h5">Sorting Algorithms</Typography>
+      </Link>
+    </>
   )
 }

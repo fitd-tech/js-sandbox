@@ -7,6 +7,7 @@ import { insertionSortIntuited } from './sortingAlgorithms/algorithms/insertionS
 import { mergeSortIntuited } from './sortingAlgorithms/algorithms/mergeSortIntuited.ts'
 import { paginate } from './sortingAlgorithms/utility/pagination.ts'
 import { getPerformanceDuration } from './sortingAlgorithms/utility/performance.ts'
+import { heapSortIntuited } from './sortingAlgorithms/algorithms/heapSortIntuited.ts'
 
 const app = express()
 const port = 3000
@@ -94,6 +95,11 @@ app.post('/insertion-sort/intuited', (req, res) => {
 app.post('/merge-sort/intuited', (req, res) => {
   console.log('someone hit /merge-sort/intuited')
   buildSortResponse(req, res, mergeSortIntuited)
+})
+
+app.post('/heap-sort/intuited', (req, res) => {
+  console.log('someone hit /heap-sort/intuited')
+  buildSortResponse(req, res, heapSortIntuited)
 })
 
 app.listen(port, () => {

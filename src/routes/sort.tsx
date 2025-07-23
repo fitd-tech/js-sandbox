@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState, useMemo, useCallback } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
 import Alert from '@mui/material/Alert'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -18,14 +18,15 @@ import type { SelectChangeEvent } from '@mui/material/Select'
 import ScrollList from '../components/ScrollList.tsx'
 import DurationInfo from '../components/DurationInfo.tsx'
 import { endpoints } from '../constants.ts'
+import ActionPanel from '../components/ActionPanel.tsx'
 
 export const Route = createFileRoute('/sort')({
-  component: About,
+  component: Sort,
 })
 
 const PAGE_SIZE = 100
 
-function About() {
+function Sort() {
   const [isGetListDialogOpen, setIsGetListDialogOpen] = useState(false)
   const [listSize, setListSize] = useState('')
   const [list, setList] = useState<number[]>([])
@@ -141,29 +142,35 @@ function About() {
     setIsLoadingSortedList(false)
   }
 
-  async function getSelectionSortIntuited() {
+  const handleClickSelectionSortIntuited = useCallback(() => {
     getSortedList(endpoints.selectionSortIntuited)
     setSortEndpoint(endpoints.selectionSortIntuited)
     setSortName('Selection Sort')
-  }
+  }, [])
 
-  async function getBubbleSortIntuited() {
+  const handleClickBubbleSortIntuited = useCallback(() => {
     getSortedList(endpoints.bubbleSortIntuited)
     setSortEndpoint(endpoints.bubbleSortIntuited)
     setSortName('Bubble Sort')
-  }
+  }, [])
 
-  async function getInsertionSortIntuited() {
+  const handleClickInsertionSortIntuited = useCallback(() => {
     getSortedList(endpoints.insertionSortIntuited)
     setSortEndpoint(endpoints.insertionSortIntuited)
     setSortName('Insertion Sort')
-  }
+  }, [])
 
-  async function getMergeSortIntuited() {
+  const handleClickMergeSortIntuited = useCallback(() => {
     getSortedList(endpoints.mergeSortIntuited)
     setSortEndpoint(endpoints.mergeSortIntuited)
     setSortName('Merge Sort')
-  }
+  }, [])
+
+  const handleClickHeapSortIntuited = useCallback(() => {
+    getSortedList(endpoints.heapSortIntuited)
+    setSortEndpoint(endpoints.heapSortIntuited)
+    setSortName('Heap Sort')
+  }, [])
 
   function getMoreSortedList() {
     if (sortEndpoint !== null) {
@@ -199,66 +206,82 @@ function About() {
     </div>
   )
 
+  const buttonConfig = useMemo(
+    () => [
+      {
+        label: 'Get List',
+        onClick: handleClickGetList,
+      },
+      {
+        label: (
+          <>
+            Selection Sort
+            <br />
+            (intuited)
+          </>
+        ),
+        onClick: handleClickSelectionSortIntuited,
+      },
+      {
+        label: (
+          <>
+            Bubble Sort
+            <br />
+            (intuited)
+          </>
+        ),
+        onClick: handleClickBubbleSortIntuited,
+      },
+      {
+        label: (
+          <>
+            Insertion Sort
+            <br />
+            (intuited)
+          </>
+        ),
+        onClick: handleClickInsertionSortIntuited,
+      },
+      {
+        label: (
+          <>
+            Merge Sort
+            <br />
+            (intuited)
+          </>
+        ),
+        onClick: handleClickMergeSortIntuited,
+      },
+      {
+        label: (
+          <>
+            Heap Sort
+            <br />
+            (testing in progress)
+          </>
+        ),
+        onClick: handleClickHeapSortIntuited,
+      },
+      {
+        label: 'Home',
+        to: '/',
+      },
+    ],
+    [
+      handleClickBubbleSortIntuited,
+      handleClickHeapSortIntuited,
+      handleClickInsertionSortIntuited,
+      handleClickMergeSortIntuited,
+      handleClickSelectionSortIntuited,
+    ]
+  )
+
   return (
     <>
       <Typography variant="h4" gutterBottom>
         Sorting Algorithms
       </Typography>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'center',
-          gap: '8px',
-          marginBottom: '20px',
-        }}
-      >
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '8px',
-            marginTop: '28px',
-          }}
-        >
-          <div>
-            <Button variant="outlined" onClick={handleClickGetList}>
-              Get list
-            </Button>
-          </div>
-          <div>
-            <Button variant="outlined" onClick={getSelectionSortIntuited}>
-              Selection Sort
-              <br />
-              (intuited)
-            </Button>
-          </div>
-          <div>
-            <Button variant="outlined" onClick={getBubbleSortIntuited}>
-              Bubble Sort
-              <br />
-              (intuited)
-            </Button>
-          </div>
-          <div>
-            <Button variant="outlined" onClick={getInsertionSortIntuited}>
-              Insertion Sort
-              <br />
-              (intuited)
-            </Button>
-          </div>
-          <div>
-            <Button variant="outlined" onClick={getMergeSortIntuited}>
-              Merge Sort
-              <br />
-              (intuited)
-            </Button>
-          </div>
-          <div>
-            <Link to="/">
-              <Button variant="outlined">Home</Button>
-            </Link>
-          </div>
-        </div>
+      <ActionPanel buttonConfig={buttonConfig}>
         <div>
           <Typography variant="subtitle1">Original list</Typography>
           <ScrollList
@@ -291,7 +314,7 @@ function About() {
             sortName={sortName}
           />
         </div>
-      </div>
+      </ActionPanel>
       {error && (
         <Alert
           severity="error"
@@ -340,5 +363,3 @@ function About() {
     </>
   )
 }
-
-// export default Route
