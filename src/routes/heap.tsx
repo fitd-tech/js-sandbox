@@ -98,6 +98,7 @@ function Heap() {
     setError(null)
     setIsLoadingUnsortedHeap(true)
     setCurrentHeap([])
+    setActionName(null)
     const data = {
       listSize: LIST_SIZE,
       pageSize: PAGE_SIZE,
@@ -211,14 +212,14 @@ function Heap() {
   }
 
   const heapPlaceholder = (
-    <div className="list-placeholder">
+    <div className="heap-placeholder">
       <Typography variant="subtitle2">The heap is empty.</Typography>
       <Typography variant="subtitle2">Click Get Raw Heap!</Typography>
     </div>
   )
 
   const currentHeapPlaceholder = (
-    <div className="list-placeholder">
+    <div className="heap-placeholder">
       <Typography variant="subtitle2">The heap is empty.</Typography>
       <Typography variant="subtitle2">
         {unsortedHeap.length ? 'Choose a heap action!' : 'Click Get Raw Heap!'}
