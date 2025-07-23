@@ -1,7 +1,12 @@
-import { useMemo, useCallback } from 'react'
-import { Typography } from '@mui/material'
+import { useMemo, useCallback, useState } from 'react'
+import { Alert, CircularProgress, Typography } from '@mui/material'
 import { createFileRoute } from '@tanstack/react-router'
 import ActionPanel from '../components/ActionPanel.tsx'
+import { endpoints } from '../constants.ts'
+import HeapInfo from '../components/HeapInfo.tsx'
+
+const LIST_SIZE = 31
+const PAGE_SIZE = 31
 
 const DEV_MOCK_HEAP_ARRAY = [
   5, 3, 8, 4, 24, 776, 42, 87, 34, 87, 34, 87, 3, 8, 4,
@@ -53,7 +58,7 @@ function HeapNode({ label }: HeapNodeProps) {
   )
 }
 
-const DEV_MOCK_HEAP = (
+/* const DEV_MOCK_HEAP = (
   <>
     <HeapRow>
       <HeapNode label={DEV_MOCK_HEAP_ARRAY[0]} />
@@ -79,21 +84,81 @@ const DEV_MOCK_HEAP = (
       <HeapNode label={DEV_MOCK_HEAP_ARRAY[14]} />
     </HeapRow>
   </>
-)
+) */
 
 function Heap() {
+  const [unsortedHeap, setUnsortedHeap] = useState([])
+  const [currentHeap, setCurrentHeap] = useState([])
+  const [isLoadingUnsortedHeap, setIsLoadingUnsortedHeap] = useState(false)
+  const [isLoadingCurrentHeap, setIsLoadingCurrentHeap] = useState(false)
+  const [actionName, setActionName] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  async function getList() {
+    setError(null)
+    setIsLoadingUnsortedHeap(true)
+    setCurrentHeap([])
+    const data = {
+      listSize: LIST_SIZE,
+      pageSize: PAGE_SIZE,
+    }
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}${endpoints.list}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }
+    )
+    if (response.ok) {
+      const responseJson = await response.json()
+      const { list } = responseJson
+      console.log('list from getList', list)
+      setUnsortedHeap(list)
+    } else {
+      const responseJson = await response.json()
+      setError(responseJson.error)
+    }
+    setIsLoadingUnsortedHeap(false)
+  }
+
+  async function getUpdatedHeap(endpoint: string) {
+    setIsLoadingCurrentHeap(true)
+    const data = {
+      pageSize: PAGE_SIZE,
+    }
+    const response = await fetch(
+      `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      }
+    )
+    const { heap } = await response.json()
+    console.log('heap from getUpdatedHeap response', heap)
+    setCurrentHeap(heap)
+    setIsLoadingCurrentHeap(false)
+  }
+
+  // DEV: Allow user to choose MIN or MAX
   const handleClickGetList = useCallback(() => {
-    console.log('clicked Get List')
+    getList()
   }, [])
 
   const handleClickHeapify = useCallback(() => {
-    console.log('clicked Heapify')
+    getUpdatedHeap(endpoints.heapify)
+    setActionName('heapify')
   }, [])
 
   const buttonConfig = useMemo(
     () => [
       {
-        label: 'Get List',
+        label: 'Get Raw Heap',
         onClick: handleClickGetList,
       },
       {
@@ -108,22 +173,30 @@ function Heap() {
     [handleClickGetList, handleClickHeapify]
   )
 
-  function renderHeap(heapArray: string[] | number[]) {
+  function renderHeap(heapArray: string[] | number[], isLoading: boolean) {
+    if (isLoading) {
+      return (
+        <div
+          style={{
+            marginTop: '220px',
+          }}
+        >
+          <CircularProgress />
+        </div>
+      )
+    }
     const renderArray: React.ReactElement[] = []
     let firstColumnIndex = 0
     let columnsInCurrentRow = 1
     while (firstColumnIndex < heapArray.length) {
-      console.log('firstColumnIndex from renderHeap', firstColumnIndex)
-      console.log('columnsInCurrentRow from renderHeap', columnsInCurrentRow)
       const columns = heapArray.slice(
         firstColumnIndex,
         firstColumnIndex + columnsInCurrentRow
       )
-      console.log('columns', columns)
       renderArray.push(
-        <HeapRow>
-          {columns.map((element) => (
-            <HeapNode label={element} />
+        <HeapRow key={columnsInCurrentRow}>
+          {columns.map((element, index) => (
+            <HeapNode key={index} label={element} />
           ))}
         </HeapRow>
       )
@@ -133,23 +206,91 @@ function Heap() {
     return renderArray
   }
 
+  function handleClickCloseErrorAlert() {
+    setError(null)
+  }
+
+  const heapPlaceholder = (
+    <div className="list-placeholder">
+      <Typography variant="subtitle2">The heap is empty.</Typography>
+      <Typography variant="subtitle2">Click Get Raw Heap!</Typography>
+    </div>
+  )
+
+  const currentHeapPlaceholder = (
+    <div className="list-placeholder">
+      <Typography variant="subtitle2">The heap is empty.</Typography>
+      <Typography variant="subtitle2">
+        {unsortedHeap.length ? 'Choose a heap action!' : 'Click Get Raw Heap!'}
+      </Typography>
+    </div>
+  )
+
   return (
     <>
       <Typography variant="h4" gutterBottom>
         Heap Data Structure
       </Typography>
-      <ActionPanel buttonConfig={buttonConfig}>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {renderHeap(DEV_MOCK_HEAP_ARRAY)}
+      <ActionPanel buttonConfig={buttonConfig} column>
+        <div>
+          <Typography variant="subtitle1">Unsorted heap</Typography>
+          <div // DEV: This should be its own component, since it wraps this pane in the sort route as well
+            style={{
+              height: '300px', // DEV: The height and width are different between sort and heap here
+              width: '800px',
+              border: '1px solid rgba(255, 255, 255, 0.87)',
+              borderRadius: '5px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {unsortedHeap.length
+                ? renderHeap(unsortedHeap, isLoadingUnsortedHeap)
+                : heapPlaceholder}
+            </div>
+          </div>
+        </div>
+        <div>
+          <Typography variant="subtitle1">Current heap</Typography>
+          <div
+            style={{
+              height: '300px',
+              width: '800px',
+              border: '1px solid rgba(255, 255, 255, 0.87)',
+              borderRadius: '5px',
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              {currentHeap.length
+                ? renderHeap(currentHeap, isLoadingCurrentHeap)
+                : currentHeapPlaceholder}
+            </div>
+          </div>
+          <HeapInfo isLoading={isLoadingCurrentHeap} actionName={actionName} />
         </div>
       </ActionPanel>
+      {error && (
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={handleClickCloseErrorAlert}
+        >
+          {error}
+        </Alert>
+      )}
     </>
   )
 }

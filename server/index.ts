@@ -8,6 +8,7 @@ import { mergeSortIntuited } from './sortingAlgorithms/algorithms/mergeSortIntui
 import { paginate } from './sortingAlgorithms/utility/pagination.ts'
 import { getPerformanceDuration } from './sortingAlgorithms/utility/performance.ts'
 import { heapSortIntuited } from './sortingAlgorithms/algorithms/heapSortIntuited.ts'
+import { Heap, HEAP_TYPES } from './heap/index.ts'
 
 const app = express()
 const port = 3000
@@ -19,6 +20,8 @@ const LIST_SIZE_LIMIT = 1000000
 
 let savedList: number[] = []
 let savedSortedList: number[] = []
+
+let savedHeap: number[] = []
 
 app.post('/list', (req, res) => {
   console.log('someone hit /list')
@@ -100,6 +103,33 @@ app.post('/merge-sort/intuited', (req, res) => {
 app.post('/heap-sort/intuited', (req, res) => {
   console.log('someone hit /heap-sort/intuited')
   buildSortResponse(req, res, heapSortIntuited)
+})
+
+function buildHeapResponse(req, res, heapFunc) {
+  const { pageSize } = req.body
+  console.log('req.body', req.body)
+  if (pageSize === undefined) {
+    const errorData = {
+      error: 'Please include a page size in your request.',
+    }
+    res.status(400).json(errorData)
+  } else {
+    const heap = heapFunc()
+    savedHeap = heap.array
+    const data = {
+      heap: savedHeap,
+    }
+    console.log('data', data)
+    res.json(data)
+  }
+}
+
+app.post('/heap/heapify', (req, res) => {
+  console.log('someone hit /heap/heapify')
+  function heapify() {
+    return new Heap(savedList, HEAP_TYPES.MIN)
+  }
+  buildHeapResponse(req, res, heapify)
 })
 
 app.listen(port, () => {

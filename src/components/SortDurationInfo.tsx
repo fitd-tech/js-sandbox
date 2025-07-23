@@ -1,16 +1,16 @@
 import { Typography } from '@mui/material'
 
-interface DurationInfoProps {
+interface SortDurationInfoProps {
   isLoading: boolean
   duration: number | null
   sortName: string | null
 }
 
-export default function DurationInfo({
+export default function SortDurationInfo({
   isLoading,
   duration,
   sortName,
-}: DurationInfoProps) {
+}: SortDurationInfoProps) {
   let content
   if (isLoading) {
     content = `Loading ${sortName}...`

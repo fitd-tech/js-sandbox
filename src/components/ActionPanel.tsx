@@ -10,12 +10,31 @@ interface ButtonData {
 interface ActionPanelProps {
   buttonConfig?: ButtonData[]
   children?: React.ReactElement | React.ReactElement[] | string
+  column?: boolean
 }
 
 export default function ActionPanel({
   buttonConfig,
   children,
+  column,
 }: ActionPanelProps) {
+  function renderChildren() {
+    if (column) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}
+        >
+          {children}
+        </div>
+      )
+    }
+    return children
+  }
+
   return (
     <div
       style={{
@@ -34,10 +53,10 @@ export default function ActionPanel({
         }}
       >
         {buttonConfig
-          ? buttonConfig.map((button) => {
+          ? buttonConfig.map((button, index) => {
               if (button.to) {
                 return (
-                  <div>
+                  <div key={index}>
                     <Link to={button.to} onClick={button.onClick}>
                       <Button variant="outlined">{button.label}</Button>
                     </Link>
@@ -45,7 +64,7 @@ export default function ActionPanel({
                 )
               }
               return (
-                <div>
+                <div key={index}>
                   <Button variant="outlined" onClick={button.onClick}>
                     {button.label}
                   </Button>
@@ -54,7 +73,7 @@ export default function ActionPanel({
             })
           : null}
       </div>
-      {children}
+      {renderChildren()}
     </div>
   )
 }

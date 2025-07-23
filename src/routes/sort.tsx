@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography'
 import type { SelectChangeEvent } from '@mui/material/Select'
 
 import ScrollList from '../components/ScrollList.tsx'
-import DurationInfo from '../components/DurationInfo.tsx'
+import SortDurationInfo from '../components/SortDurationInfo.tsx'
 import { endpoints } from '../constants.ts'
 import ActionPanel from '../components/ActionPanel.tsx'
 
@@ -308,7 +308,7 @@ function Sort() {
             getMore={getMoreSortedList}
             hasMorePages={hasMorePages}
           />
-          <DurationInfo
+          <SortDurationInfo
             isLoading={isLoadingSortedList}
             duration={duration}
             sortName={sortName}
