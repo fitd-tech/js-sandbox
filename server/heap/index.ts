@@ -63,7 +63,7 @@ export class Heap {
     for (let i = this.heapArray.length - 1; i >= 0; i--) {
       console.log('array.length - i from heapify', array.length - i)
       if (
-        DEBUG_ITERATION_LIMIT &&
+        !!DEBUG_ITERATION_LIMIT &&
         this.heapArray.length - i > DEBUG_ITERATION_LIMIT
       ) {
         break
@@ -121,14 +121,12 @@ export class Heap {
       )
       const noValidChildValue =
         leftChild.value === undefined && rightChild.value === undefined
-      const leftChildShouldSwap = this.getShouldSwapValuesVertically(
-        currentValue,
-        leftChild.value
-      )
-      const rightChildShouldSwap = this.getShouldSwapValuesVertically(
-        currentValue,
-        rightChild.value
-      )
+      const leftChildShouldSwap =
+        !!leftChild.value &&
+        this.getShouldSwapValuesVertically(currentValue, leftChild.value)
+      const rightChildShouldSwap =
+        !!rightChild.value &&
+        this.getShouldSwapValuesVertically(currentValue, rightChild.value)
       console.log(
         'leftChildShouldSwap from getShouldWhileContinue',
         leftChildShouldSwap
@@ -162,16 +160,16 @@ export class Heap {
       if (rightChild.value === undefined) {
         console.log('There is no right child')
         this.swapElementValues(currentIndex, leftChild.index)
+        currentValue = this.getLeftChild(currentIndex).value
         currentIndex = leftChild.index
-        currentValue = leftChild.value
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       } else if (leftChild.value === undefined) {
-        // This case should never be met in a valid heap
+        // This case should never be met in a valid heap (since we never enter the while loop if both child values are undefined)
         console.log('There is no left child')
         this.swapElementValues(currentIndex, rightChild.index)
+        currentValue = this.getRightChild(currentIndex).value
         currentIndex = rightChild.index
-        currentValue = rightChild.value
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       } else if (
@@ -179,15 +177,15 @@ export class Heap {
       ) {
         console.log('Left child should be swapped')
         this.swapElementValues(currentIndex, leftChild.index)
+        currentValue = this.getLeftChild(currentIndex).value
         currentIndex = leftChild.index
-        currentValue = leftChild.value
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       } else {
         console.log('Right child should be swapped')
         this.swapElementValues(currentIndex, rightChild.index)
+        currentValue = this.getRightChild(currentIndex).value
         currentIndex = rightChild.index
-        currentValue = leftChild.value
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       }
@@ -245,6 +243,7 @@ export class Heap {
   }
 
   validateHeap() {
+    console.log('called validateHeap')
     let heapValid = true
     for (let i = 0; i < this.heapArray.length; i++) {
       const leftChild = this.getLeftChild(i)
@@ -306,15 +305,27 @@ export class Heap {
     childValue,
     { includeEqual }: CompareValuesOptions = { includeEqual: false }
   ) {
+    console.log('currentValue from getShouldSwapValuesVertically', currentValue)
+    console.log('childValue from getShouldSwapValuesVertically', childValue)
     return !this.compareValues(currentValue, childValue, { includeEqual })
   }
 
   compareValuesHorizontally(
-    leftSibling,
-    rightSibling,
+    leftSiblingValue,
+    rightSiblingValue,
     { includeEqual }: CompareValuesOptions = { includeEqual: false }
   ) {
-    return this.compareValues(leftSibling, rightSibling, { includeEqual })
+    console.log(
+      'leftSiblingValue from compareValuesHorizontally',
+      leftSiblingValue
+    )
+    console.log(
+      'rightSiblingValue from compareValuesHorizontally',
+      rightSiblingValue
+    )
+    return this.compareValues(leftSiblingValue, rightSiblingValue, {
+      includeEqual,
+    })
   }
 
   get array() {

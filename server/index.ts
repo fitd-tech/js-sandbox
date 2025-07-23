@@ -21,7 +21,8 @@ const LIST_SIZE_LIMIT = 1000000
 let savedList: number[] = []
 let savedSortedList: number[] = []
 
-let savedHeap: number[] = []
+let savedHeap: Heap
+let savedHeapArray: number[] = []
 
 app.post('/list', (req, res) => {
   console.log('someone hit /list')
@@ -115,9 +116,9 @@ function buildHeapResponse(req, res, heapFunc) {
     res.status(400).json(errorData)
   } else {
     const heap = heapFunc()
-    savedHeap = heap.array
+    savedHeapArray = heap.array
     const data = {
-      heap: savedHeap,
+      heap: savedHeapArray,
     }
     console.log('data', data)
     res.json(data)
@@ -127,7 +128,8 @@ function buildHeapResponse(req, res, heapFunc) {
 app.post('/heap/heapify', (req, res) => {
   console.log('someone hit /heap/heapify')
   function heapify() {
-    return new Heap(savedList, HEAP_TYPES.MIN)
+    savedHeap = new Heap(savedList, HEAP_TYPES.MIN)
+    return savedHeap
   }
   buildHeapResponse(req, res, heapify)
 })

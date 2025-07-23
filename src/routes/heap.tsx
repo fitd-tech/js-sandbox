@@ -8,9 +8,9 @@ import HeapInfo from '../components/HeapInfo.tsx'
 const LIST_SIZE = 31
 const PAGE_SIZE = 31
 
-const DEV_MOCK_HEAP_ARRAY = [
+/* const DEV_MOCK_HEAP_ARRAY = [
   5, 3, 8, 4, 24, 776, 42, 87, 34, 87, 34, 87, 3, 8, 4,
-]
+] */
 
 export const Route = createFileRoute('/heap')({
   component: Heap,
