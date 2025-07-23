@@ -132,7 +132,7 @@ export class Heap {
       )
       return doesParentExist && shouldSwapParentAndChild
     }
-    const DEBUG_ITERATION_LIMIT = 5
+    const DEBUG_ITERATION_LIMIT = null
     let debugIteration = 0
     while (
       getShouldSwapParentAndChild() &&
@@ -188,10 +188,10 @@ export class Heap {
       const noValidChildValue =
         leftChild.value === undefined && rightChild.value === undefined
       const leftChildShouldSwap =
-        !!leftChild.value &&
+        leftChild.value !== undefined &&
         this.getShouldSwapValuesVertically(currentValue, leftChild.value)
       const rightChildShouldSwap =
-        !!rightChild.value &&
+        rightChild.value !== undefined &&
         this.getShouldSwapValuesVertically(currentValue, rightChild.value)
       // console.log(
       //   'leftChildShouldSwap from getShouldWhileContinue',
@@ -236,8 +236,8 @@ export class Heap {
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       } else if (leftChild.value === undefined) {
+        console.warn('There is no left child. This should not happen here.')
         // DEV: This case should never be met in a valid heap (since we never enter the while loop if both child values are undefined)
-        // console.log('There is no left child')
         this.swapElementValues(currentIndex, rightChild.index)
         currentValue = this.getRightChild(currentIndex).value
         currentIndex = rightChild.index
