@@ -35,13 +35,20 @@ export class Heap {
 
   // BASIC
 
-  findMax() {}
+  findRoot() {
+    return this.heapArray[0]
+  }
 
-  insert() {}
+  insert(value) {
+    // Push a the new value to heapArray
+    this.heapArray.push(value)
+    // Perform siftUp on the node to move it up to its proper place
+    this.siftUp(this.heapArray.length - 1)
+  }
 
-  extractMax() {}
+  extractRoot() {}
 
-  deleteMax() {}
+  deleteRoot() {}
 
   replace() {}
 
@@ -61,7 +68,7 @@ export class Heap {
     const DEBUG_ITERATION_LIMIT = null
     // DEV: This loop should begin where 2i + 1 will give a valid array element
     for (let i = this.heapArray.length - 1; i >= 0; i--) {
-      console.log('array.length - i from heapify', array.length - i)
+      // console.log('array.length - i from heapify', array.length - i)
       if (
         !!DEBUG_ITERATION_LIMIT &&
         this.heapArray.length - i > DEBUG_ITERATION_LIMIT
@@ -93,32 +100,58 @@ export class Heap {
 
   delete() {}
 
-  siftUp() {}
+  siftUp(index) {
+    // Store the current index
+    let currentIndex = index
+    // Get the value of the current node
+    let currentValue = this.heapArray[currentIndex]
+    // Get the parent of the current node
+    let currentParent = this.getParent(currentIndex)
+    // While the node has a parent and the parent value should be swapped with the node value, continue
+    const doesParentExist = currentParent.value
+    const shouldSwapParentAndChild = this.getShouldSwapValuesVertically(
+      currentParent.value,
+      currentValue
+    )
+    while (doesParentExist && shouldSwapParentAndChild) {
+      // Swap the node value and the parent value
+      this.swapElementValues(currentParent.index, currentIndex)
+      // Set the current index and value to the new parent index and value
+      currentValue = this.getParent(currentIndex).value
+      currentIndex = currentParent.index
+      currentParent = this.getParent(currentIndex)
+    }
+    // Validate the heap
+    this.validateHeap()
+  }
 
   siftDown(index) {
     console.log('called siftDown')
+    // Get the initial children
     let leftChild = this.getLeftChild(index)
     let rightChild = this.getRightChild(index)
-    console.log('leftChild from siftDown', leftChild)
-    console.log('rightChild from siftDown', rightChild)
+    // console.log('leftChild from siftDown', leftChild)
+    // console.log('rightChild from siftDown', rightChild)
+    // If both children don't exist, no need to sift
     if (leftChild.value === undefined && rightChild.value === undefined) {
       return
     }
     let currentIndex = index
     let currentValue = this.heapArray[currentIndex]
-    console.log('currentIndex from siftDown', currentIndex)
-    console.log('currentValue from siftDown', currentValue)
+    // console.log('currentIndex from siftDown', currentIndex)
+    // console.log('currentValue from siftDown', currentValue)
+    // While loop should only continue if at least on child exists and it should be swapped with its parent
     const getShouldWhileContinue = () => {
-      console.log('currentIndex from getShouldWhileContinue', currentIndex)
-      console.log('currentValue from getShouldWhileContinue', currentValue)
-      console.log(
-        'leftChild.value from getShouldWhileContinue',
-        leftChild.value
-      )
-      console.log(
-        'rightChild.value from getShouldWhileContinue',
-        rightChild.value
-      )
+      // console.log('currentIndex from getShouldWhileContinue', currentIndex)
+      // console.log('currentValue from getShouldWhileContinue', currentValue)
+      // console.log(
+      //   'leftChild.value from getShouldWhileContinue',
+      //   leftChild.value
+      // )
+      // console.log(
+      //   'rightChild.value from getShouldWhileContinue',
+      //   rightChild.value
+      // )
       const noValidChildValue =
         leftChild.value === undefined && rightChild.value === undefined
       const leftChildShouldSwap =
@@ -127,21 +160,21 @@ export class Heap {
       const rightChildShouldSwap =
         !!rightChild.value &&
         this.getShouldSwapValuesVertically(currentValue, rightChild.value)
-      console.log(
-        'leftChildShouldSwap from getShouldWhileContinue',
-        leftChildShouldSwap
-      )
-      console.log(
-        'rightChildShouldSwap from getShouldWhileContinue',
-        rightChildShouldSwap
-      )
+      // console.log(
+      //   'leftChildShouldSwap from getShouldWhileContinue',
+      //   leftChildShouldSwap
+      // )
+      // console.log(
+      //   'rightChildShouldSwap from getShouldWhileContinue',
+      //   rightChildShouldSwap
+      // )
       // DEV: This can be refined to remove the check for the right child once we know we will never create a heap where a right child exists without the left
       const shouldWhileContinue =
         !noValidChildValue && (leftChildShouldSwap || rightChildShouldSwap)
-      console.log(
-        'shouldWhileContinue from getShouldWhileContinue',
-        shouldWhileContinue
-      )
+      // console.log(
+      //   'shouldWhileContinue from getShouldWhileContinue',
+      //   shouldWhileContinue
+      // )
       return shouldWhileContinue
     }
     const DEBUG_ITERATION_LIMIT = null
@@ -150,23 +183,28 @@ export class Heap {
       getShouldWhileContinue() &&
       (!DEBUG_ITERATION_LIMIT || iteration < DEBUG_ITERATION_LIMIT)
     ) {
-      console.log('iteration from while loop', iteration)
-      console.log('currentIndex from while loop', currentIndex)
-      console.log('currentValue from while loop', currentValue)
-      console.log('leftChild.index from while loop', leftChild.index)
-      console.log('leftChild.value from while loop', leftChild.value)
-      console.log('rightChild.index from while loop', rightChild.index)
-      console.log('rightChild.value from while loop', rightChild.value)
+      // console.log('iteration from while loop', iteration)
+      // console.log('currentIndex from while loop', currentIndex)
+      // console.log('currentValue from while loop', currentValue)
+      // console.log('leftChild.index from while loop', leftChild.index)
+      // console.log('leftChild.value from while loop', leftChild.value)
+      // console.log('rightChild.index from while loop', rightChild.index)
+      // console.log('rightChild.value from while loop', rightChild.value)
       if (rightChild.value === undefined) {
-        console.log('There is no right child')
+        // console.log('There is no right child')
+        // Swap the parent value with the child value
         this.swapElementValues(currentIndex, leftChild.index)
+        // Set the current value to the former swapped child value
+        // DEV: De we really need to set these values?
         currentValue = this.getLeftChild(currentIndex).value
+        // Set the current index to the index of the swapped child
         currentIndex = leftChild.index
+        // Get the new children
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       } else if (leftChild.value === undefined) {
-        // This case should never be met in a valid heap (since we never enter the while loop if both child values are undefined)
-        console.log('There is no left child')
+        // DEV: This case should never be met in a valid heap (since we never enter the while loop if both child values are undefined)
+        // console.log('There is no left child')
         this.swapElementValues(currentIndex, rightChild.index)
         currentValue = this.getRightChild(currentIndex).value
         currentIndex = rightChild.index
@@ -175,14 +213,15 @@ export class Heap {
       } else if (
         this.compareValuesHorizontally(leftChild.value, rightChild.value)
       ) {
-        console.log('Left child should be swapped')
+        // DEV: We may be able to refine this condition, because we already look at the values of the children in getShouldWhileContinue
+        // console.log('Left child should be swapped')
         this.swapElementValues(currentIndex, leftChild.index)
         currentValue = this.getLeftChild(currentIndex).value
         currentIndex = leftChild.index
         leftChild = this.getLeftChild(currentIndex)
         rightChild = this.getRightChild(currentIndex)
       } else {
-        console.log('Right child should be swapped')
+        // console.log('Right child should be swapped')
         this.swapElementValues(currentIndex, rightChild.index)
         currentValue = this.getRightChild(currentIndex).value
         currentIndex = rightChild.index
@@ -221,27 +260,28 @@ export class Heap {
   }
 
   swapElementValues(index1, index2) {
-    console.log(
-      'this.heapArray[index1] from swapElementValues',
-      this.heapArray[index1]
-    )
-    console.log(
-      'this.heapArray[index2] from swapElementValues',
-      this.heapArray[index2]
-    )
+    // console.log(
+    //   'this.heapArray[index1] from swapElementValues',
+    //   this.heapArray[index1]
+    // )
+    // console.log(
+    //   'this.heapArray[index2] from swapElementValues',
+    //   this.heapArray[index2]
+    // )
     const index1Value = this.heapArray[index1]
     this.heapArray[index1] = this.heapArray[index2]
     this.heapArray[index2] = index1Value
-    console.log(
-      'this.heapArray[index1] after swap from swapElementValues',
-      this.heapArray[index1]
-    )
-    console.log(
-      'this.heapArray[index2] after swap from swapElementValues',
-      this.heapArray[index2]
-    )
+    // console.log(
+    //   'this.heapArray[index1] after swap from swapElementValues',
+    //   this.heapArray[index1]
+    // )
+    // console.log(
+    //   'this.heapArray[index2] after swap from swapElementValues',
+    //   this.heapArray[index2]
+    // )
   }
 
+  // DEV: This should be recursive to traverse all children
   validateHeap() {
     console.log('called validateHeap')
     let heapValid = true
@@ -282,9 +322,9 @@ export class Heap {
     value2,
     { includeEqual }: CompareValuesOptions = { includeEqual: false }
   ) {
-    console.log('value1 from compareValues', value1)
-    console.log('value2 from compareValues', value2)
-    console.log('this.type from compareValues', this.type)
+    // console.log('value1 from compareValues', value1)
+    // console.log('value2 from compareValues', value2)
+    // console.log('this.type from compareValues', this.type)
     if (this.type === HEAP_TYPES.MIN) {
       if (includeEqual) {
         return value1 <= value2
@@ -301,13 +341,13 @@ export class Heap {
   }
 
   getShouldSwapValuesVertically(
-    currentValue,
+    parentValue,
     childValue,
     { includeEqual }: CompareValuesOptions = { includeEqual: false }
   ) {
-    console.log('currentValue from getShouldSwapValuesVertically', currentValue)
-    console.log('childValue from getShouldSwapValuesVertically', childValue)
-    return !this.compareValues(currentValue, childValue, { includeEqual })
+    // console.log('currentValue from getShouldSwapValuesVertically', currentValue)
+    // console.log('childValue from getShouldSwapValuesVertically', childValue)
+    return !this.compareValues(parentValue, childValue, { includeEqual })
   }
 
   compareValuesHorizontally(
@@ -315,14 +355,14 @@ export class Heap {
     rightSiblingValue,
     { includeEqual }: CompareValuesOptions = { includeEqual: false }
   ) {
-    console.log(
-      'leftSiblingValue from compareValuesHorizontally',
-      leftSiblingValue
-    )
-    console.log(
-      'rightSiblingValue from compareValuesHorizontally',
-      rightSiblingValue
-    )
+    // console.log(
+    //   'leftSiblingValue from compareValuesHorizontally',
+    //   leftSiblingValue
+    // )
+    // console.log(
+    //   'rightSiblingValue from compareValuesHorizontally',
+    //   rightSiblingValue
+    // )
     return this.compareValues(leftSiblingValue, rightSiblingValue, {
       includeEqual,
     })
