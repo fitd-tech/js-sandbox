@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  Typography,
 } from '@mui/material'
 
 interface DialogProps {
@@ -13,6 +14,7 @@ interface DialogProps {
   title?: string
   children: React.ReactElement | React.ReactElement[]
   onSubmit: React.FormEventHandler<HTMLFormElement>
+  description?: string | React.ReactElement | React.ReactElement[]
 }
 
 export default function FormDialog({
@@ -21,6 +23,7 @@ export default function FormDialog({
   title,
   children,
   onSubmit,
+  description,
 }: DialogProps) {
   return (
     <Dialog
@@ -32,6 +35,9 @@ export default function FormDialog({
     >
       {title && <DialogTitle>{title}</DialogTitle>}
       <DialogContent sx={{ paddingBottom: 0 }}>
+        {description && (
+          <Typography sx={{ marginBottom: '20px' }}>{description}</Typography>
+        )}
         <form onSubmit={onSubmit}>
           <FormControl fullWidth>{children}</FormControl>
           <DialogActions>

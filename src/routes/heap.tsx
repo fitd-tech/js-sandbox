@@ -1,5 +1,14 @@
 import { useMemo, useCallback, useState } from 'react'
-import { Alert, CircularProgress, TextField, Typography } from '@mui/material'
+import {
+  Alert,
+  CircularProgress,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography,
+  type SelectChangeEvent,
+} from '@mui/material'
 import { createFileRoute } from '@tanstack/react-router'
 import ActionPanel, {
   type ActionPanelButtons,
@@ -95,6 +104,8 @@ function Heap() {
   const [hasHeapified, setHasHeapified] = useState(false)
   const [isGetListDialogOpen, setIsGetListDialogOpen] = useState(false)
   const [listSize, setListSize] = useState('')
+  const [isHeapifyDialogOpen, setIsHeapifyDialogOpen] = useState(false)
+  const [heapType, setHeapType] = useState('MIN')
   const [isInsertValueDialogOpen, setIsInsertValueDialogOpen] = useState(false)
   const [valueToInsert, setValueToInsert] = useState('')
   const [isLoadingUnsortedHeap, setIsLoadingUnsortedHeap] = useState(false)
@@ -194,9 +205,8 @@ function Heap() {
   }, [])
 
   const handleClickHeapify = useCallback(() => {
-    getUpdatedHeap(endpoints.heap.heapify)
-    setActionName('heapify')
-  }, [getUpdatedHeap])
+    setIsHeapifyDialogOpen(true)
+  }, [])
 
   const handleClickInsert = useCallback(() => {
     setIsInsertValueDialogOpen(true)
@@ -302,6 +312,27 @@ function Heap() {
     setIsGetListDialogOpen(false)
   }
 
+  function handleChangeHeapType(event: SelectChangeEvent) {
+    setHeapType(event.target.value as string)
+  }
+
+  const handleHeapify = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      const payload = {
+        type: heapType,
+      }
+      await getUpdatedHeap(endpoints.heap.heapify, payload)
+      setActionName('heapify')
+      setIsHeapifyDialogOpen(false)
+    },
+    [getUpdatedHeap, heapType]
+  )
+
+  function handleCloseHeapifyDialog() {
+    setIsHeapifyDialogOpen(false)
+  }
+
   function handleChangeInsertValueInput(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
@@ -317,7 +348,7 @@ function Heap() {
       const payload = {
         value: Number(valueToInsert),
       }
-      await getUpdatedHeap(endpoints.heap.insert, payload) // DEV: We need to provide the value to insert here somehow
+      await getUpdatedHeap(endpoints.heap.insert, payload)
       setActionName('insert')
       setIsInsertValueDialogOpen(false)
     },
@@ -412,6 +443,26 @@ function Heap() {
             marginTop: '5px',
           }}
         />
+      </FormDialog>
+      <FormDialog
+        isOpen={isHeapifyDialogOpen}
+        onClose={handleCloseHeapifyDialog}
+        title="Heapify"
+        onSubmit={handleHeapify}
+        description="Choose the type of heap you want to generate. A min-heap has the
+          lowest value at the root, and a max-heap has the highest."
+      >
+        <InputLabel id="heap-type-select-label">Type</InputLabel>
+        <Select
+          labelId="heap-type-select-label"
+          id="heap-type-select"
+          value={heapType}
+          label="Type"
+          onChange={handleChangeHeapType}
+        >
+          <MenuItem value="MIN">MIN</MenuItem>
+          <MenuItem value="MAX">MAX</MenuItem>
+        </Select>
       </FormDialog>
       <FormDialog
         isOpen={isInsertValueDialogOpen}

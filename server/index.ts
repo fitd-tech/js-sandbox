@@ -127,11 +127,20 @@ function buildHeapResponse(req, res, heapFunc) {
 
 app.post('/heap/heapify', (req, res) => {
   console.log('someone hit /heap/heapify')
-  function heapify() {
-    savedHeap = new Heap(savedList, HEAP_TYPES.MIN)
-    // return savedHeap // DEV: Do we need to return this?
+  const { type } = req.body
+  console.log('type from /heap/heapfiy/ req.body', type)
+  if (type && type !== 'MIN' && type !== 'MAX') {
+    // DEV: We should just compare with the HEAP_TYPES values
+    const errorData = {
+      error: 'Please submit a valid heap type.',
+    }
+    res.status(400).json(errorData)
+  } else {
+    function heapify() {
+      savedHeap = new Heap(savedList, type || HEAP_TYPES.MIN)
+    }
+    buildHeapResponse(req, res, heapify)
   }
-  buildHeapResponse(req, res, heapify)
 })
 
 app.post('/heap/insert', (req, res) => {
