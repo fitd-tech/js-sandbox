@@ -1,22 +1,12 @@
 import { useMemo, useCallback, useState } from 'react'
-import {
-  Alert,
-  Button,
-  CircularProgress,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  FormControl,
-  TextField,
-  Typography,
-} from '@mui/material'
+import { Alert, CircularProgress, TextField, Typography } from '@mui/material'
 import { createFileRoute } from '@tanstack/react-router'
 import ActionPanel, {
   type ActionPanelButtons,
 } from '../components/ActionPanel.tsx'
 import { endpoints } from '../constants.ts'
 import HeapInfo from '../components/HeapInfo.tsx'
+import FormDialog from '../components/FormDialog.tsx'
 
 // const LIST_SIZE = 31
 const PAGE_SIZE = 31
@@ -216,7 +206,7 @@ function Heap() {
     // DEV: This type isn't enforcing that unlisted object keys shouldn't be present
     () => [
       {
-        label: 'Get Raw Heap',
+        label: 'Get Raw List',
         onClick: handleClickGetList,
       },
       {
@@ -403,70 +393,47 @@ function Heap() {
           {error}
         </Alert>
       )}
-      <Dialog // DEV: This can be a generic dialog framework component with a nested form control select body component
-        open={isGetListDialogOpen}
+      <FormDialog
+        isOpen={isGetListDialogOpen}
         onClose={handleCloseGetListDialog}
-        maxWidth="sm"
-        fullWidth
-        disableRestoreFocus // https://github.com/mui/material-ui/issues/33004#issuecomment-1455260156
+        title="Get Raw List"
+        onSubmit={getList}
       >
-        <DialogTitle>Get Raw Heap</DialogTitle>
-        <DialogContent sx={{ paddingBottom: 0 }}>
-          <form onSubmit={getList}>
-            <FormControl fullWidth>
-              <TextField
-                autoFocus
-                required
-                id="list-size-input"
-                label="Enter an initial size for the heap"
-                variant="outlined"
-                helperText="Choose a number between 0 and 31."
-                onChange={handleChangeListSizeInput}
-                error={!!listSize && !isListSizeValid}
-                sx={{
-                  marginTop: '5px',
-                }}
-              />
-            </FormControl>
-            <DialogActions>
-              <Button onClick={handleCloseGetListDialog}>Cancel</Button>
-              <Button type="submit">Ok</Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
-      <Dialog
-        open={isInsertValueDialogOpen}
+        <TextField
+          autoFocus
+          required
+          id="list-size-input"
+          label="Enter an initial size for the heap"
+          variant="outlined"
+          helperText="Choose a number between 0 and 31."
+          onChange={handleChangeListSizeInput}
+          error={!!listSize && !isListSizeValid}
+          sx={{
+            marginTop: '5px',
+          }}
+        />
+      </FormDialog>
+      <FormDialog
+        isOpen={isInsertValueDialogOpen}
         onClose={handleCloseInsertValueDialog}
-        maxWidth="sm"
-        fullWidth
-        disableRestoreFocus // https://github.com/mui/material-ui/issues/33004#issuecomment-1455260156
+        title="Insert a Value"
+        onSubmit={handleInsertHeapValue}
       >
-        <DialogTitle>Insert a Value</DialogTitle>
-        <DialogContent sx={{ paddingBottom: 0 }}>
-          <form onSubmit={handleInsertHeapValue}>
-            <FormControl fullWidth>
-              <TextField
-                autoFocus
-                required
-                id="insert-value-input"
-                label="Enter a value to add to the heap"
-                variant="outlined"
-                helperText="Choose a number between -1000 and 1000."
-                onChange={handleChangeInsertValueInput}
-                error={!!valueToInsert && !isValueToInsertValid}
-                sx={{
-                  marginTop: '5px',
-                }}
-              />
-            </FormControl>
-            <DialogActions>
-              <Button onClick={handleCloseInsertValueDialog}>Cancel</Button>
-              <Button type="submit">Ok</Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
+        <TextField
+          autoFocus
+          required
+          id="insert-value-input"
+          label="Enter a value to add to the heap"
+          variant="outlined"
+          helperText="Choose a number between -1000 and 1000."
+          onChange={handleChangeInsertValueInput}
+          error={!!valueToInsert && !isValueToInsertValid}
+          sx={{
+            marginTop: '5px',
+          }}
+        />
+      </FormDialog>
+      {/* TODO: Add heap type dialog here (MIN/MAX) */}
     </>
   )
 }
