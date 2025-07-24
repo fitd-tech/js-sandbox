@@ -53,6 +53,8 @@ app.post('/list', (req, res) => {
   }
 })
 
+// SORTING ALGORITHMS
+
 function buildSortResponse(req, res, sortFunc) {
   const { pageSize, page } = req.body
   console.log('req.body', req.body)
@@ -105,6 +107,8 @@ app.post('/heap-sort/intuited', (req, res) => {
   console.log('someone hit /heap-sort/intuited')
   buildSortResponse(req, res, heapSortIntuited)
 })
+
+// HEAP DATA SCTRUCTURE
 
 function buildHeapResponse(req, res, heapFunc) {
   const { pageSize } = req.body

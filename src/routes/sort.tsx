@@ -254,7 +254,7 @@ function Sort() {
           <>
             Heap Sort
             <br />
-            (testing in progress)
+            (intuited)
           </>
         ),
         onClick: handleClickHeapSortIntuited,
