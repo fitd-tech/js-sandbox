@@ -3,6 +3,7 @@ export const endpoints = {
   heap: {
     heapify: '/heap/heapify/',
     insert: '/heap/insert/',
+    extractRoot: '/heap/extract-root/',
   },
   selectionSortIntuited: '/selection-sort/intuited/',
   bubbleSortIntuited: '/bubble-sort/intuited/',

@@ -46,11 +46,38 @@ export class Heap {
     this.siftUp(this.heapArray.length - 1)
   }
 
-  extractRoot() {}
+  extractRoot() {
+    // Swap the values in the first and last indices of the array
+    this.swapElementValues(0, this.heapArray.length - 1)
+    // Pop the array and save it
+    const rootValue = this.heapArray.pop()
+    // Sift down from the root node
+    this.siftDown(0)
 
-  deleteRoot() {}
+    return rootValue
+  }
 
+  // This is listed in the wiki, but it seems to be the same as extractRoot with no return value.
+  // deleteRoot() {}
+
+  // DEV: Pay attention to the description in the wiki. It does not describe the same operation as the below update method.
   replace() {}
+
+  // This method doesn't seem to listed in the wiki, but is its methodology is described in the video.
+  update(index, value) {
+    // Save the value of the node at this index.
+    const originalValue = this.heapArray[index]
+    // Replace the value of the node.
+    this.heapArray[index] = value
+    // Compare the new and old node values.
+    // If the values are the same, do nothing.
+    // Otherwise, get the sift direction
+    if (originalValue === value) {
+      return
+    }
+    const siftFunc = this.getUpdateSiftFunc(value, originalValue)
+    siftFunc(index)
+  }
 
   // CREATION
 
@@ -400,6 +427,35 @@ export class Heap {
     return this.compareValues(leftSiblingValue, rightSiblingValue, {
       includeEqual,
     })
+  }
+
+  getUpdateSiftFunc(originalValue, newValue) {
+    /*
+      Sift direction:
+        MIN-HEAP
+          newValue < originalValue -> UP
+          newValue > originalValue -> DOWN
+        MAX-HEAP
+          newValue < originalValue -> DOWN
+          newValue > originalValue -> UP
+
+      this.compareValues return values:
+        MIN-HEAP
+          newValue < originalValue -> true
+          newValue > originalValue -> false
+        MAX-HEAP
+          newValue < originalValue -> false
+          newValue > originalValue -> true
+        
+      Therefore:
+        true -> UP
+        false -> DOWN
+    */
+    const siftDirectionBoolean = this.compareValues(newValue, originalValue)
+    if (siftDirectionBoolean) {
+      return this.siftUp
+    }
+    return this.siftDown
   }
 
   get array() {

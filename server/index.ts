@@ -159,6 +159,14 @@ app.post('/heap/insert', (req, res) => {
   }
 })
 
+app.post('/heap/extract-root', (req, res) => {
+  console.log('someone hit /heap/extract-root')
+  function extractRoot() {
+    savedHeap.extractRoot()
+  }
+  buildHeapResponse(req, res, extractRoot)
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

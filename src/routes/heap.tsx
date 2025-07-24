@@ -49,12 +49,14 @@ function HeapRow({ children }: HeapRowProps) {
 
 interface HeapNodeProps {
   label: string | number
+  index?: number
 }
 
-function HeapNode({ label }: HeapNodeProps) {
+function HeapNode({ label, index }: HeapNodeProps) {
   return (
     <div
       style={{
+        position: 'relative', // For absolute positioning of the array index marker
         width: '25px',
         height: '25px',
         minWidth: '25px',
@@ -66,6 +68,19 @@ function HeapNode({ label }: HeapNodeProps) {
       }}
     >
       <Typography>{label}</Typography>
+      {index !== undefined && (
+        <Typography
+          variant="caption"
+          sx={{
+            position: 'absolute',
+            top: -18,
+            left: 0,
+            right: 0,
+          }}
+        >
+          {index}
+        </Typography>
+      )}
     </div>
   )
 }
@@ -103,7 +118,7 @@ function Heap() {
   const [currentHeap, setCurrentHeap] = useState([])
   const [hasHeapified, setHasHeapified] = useState(false)
   const [isGetListDialogOpen, setIsGetListDialogOpen] = useState(false)
-  const [listSize, setListSize] = useState('')
+  const [listSize, setListSize] = useState('30')
   const [isHeapifyDialogOpen, setIsHeapifyDialogOpen] = useState(false)
   const [heapType, setHeapType] = useState('MIN')
   const [isInsertValueDialogOpen, setIsInsertValueDialogOpen] = useState(false)
@@ -212,6 +227,11 @@ function Heap() {
     setIsInsertValueDialogOpen(true)
   }, [])
 
+  const handleClickExtractRoot = useCallback(() => {
+    getUpdatedHeap(endpoints.heap.extractRoot)
+    setActionName('extract root')
+  }, [getUpdatedHeap])
+
   const buttonConfig: ActionPanelButtons = useMemo(
     // DEV: This type isn't enforcing that unlisted object keys shouldn't be present
     () => [
@@ -230,11 +250,17 @@ function Heap() {
         disabled: !hasHeapified,
       },
       {
+        label: 'Extract Root',
+        onClick: handleClickExtractRoot,
+        disabled: !hasHeapified,
+      },
+      {
         label: 'Home',
         to: '/',
       },
     ],
     [
+      handleClickExtractRoot,
       handleClickGetList,
       handleClickHeapify,
       handleClickInsert,
@@ -258,20 +284,38 @@ function Heap() {
     const renderArray: React.ReactElement[] = []
     let firstColumnIndex = 0
     let columnsInCurrentRow = 1
-    while (firstColumnIndex < heapArray.length) {
-      const columns = heapArray.slice(
+    // DEV: We need to keep track of the original array indices of each node for the index prop that provides the label to the page element
+    // We want to do this without performing increment side-effects inside of the loops if possible
+    // a. We could write formulas to determine the indices based on row number <-- X
+    // b. We could simply map a new array at the beginning that holds the original indices. <-- this would be easier to understand and maintain
+    const indexedHeapArray = heapArray.map((value, index) => ({
+      index,
+      value,
+    }))
+    while (firstColumnIndex < indexedHeapArray.length) {
+      const columns = indexedHeapArray.slice(
         firstColumnIndex,
         firstColumnIndex + columnsInCurrentRow
       )
       // If we don't have enough elements to fill the current we have to push empty nodes for alignment purposes
-      // DEV: We can make empty nodes invisible
-      const populatedNodes = columns.map((element, index) => (
-        <HeapNode key={`node-${index}`} label={element} />
+      // DEV: We can make empty nodes invisible?
+      const populatedNodes = columns.map((element) => (
+        <HeapNode
+          key={element.index}
+          label={element.value}
+          index={element.index}
+        />
       ))
       // Create another array of empty nodes here (the difference between nodes.length and columnsInCurrentRow) and add it to nodes
       const emptyNodes = []
       for (let i = 0; i < columnsInCurrentRow - populatedNodes.length; i++) {
-        emptyNodes.push(<HeapNode key={`empty-node-${i}`} label={' '} />)
+        emptyNodes.push(
+          <HeapNode
+            key={indexedHeapArray.length - 1 + i}
+            label={' '}
+            index={indexedHeapArray.length - 1 + 1}
+          />
+        )
       }
       const nodes = [...populatedNodes, ...emptyNodes]
       renderArray.push(<HeapRow key={columnsInCurrentRow}>{nodes}</HeapRow>)
@@ -322,6 +366,7 @@ function Heap() {
       const payload = {
         type: heapType,
       }
+      // DEV: Why are we awaiting?
       await getUpdatedHeap(endpoints.heap.heapify, payload)
       setActionName('heapify')
       setIsHeapifyDialogOpen(false)
@@ -373,6 +418,7 @@ function Heap() {
               width: '800px',
               border: '1px solid rgba(255, 255, 255, 0.87)',
               borderRadius: '5px',
+              paddingTop: '20px',
             }}
           >
             <div
@@ -381,6 +427,7 @@ function Heap() {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
+                gap: '10px',
               }}
             >
               {previousHeap.length
@@ -397,6 +444,7 @@ function Heap() {
               width: '800px',
               border: '1px solid rgba(255, 255, 255, 0.87)',
               borderRadius: '5px',
+              paddingTop: '20px',
             }}
           >
             <div
@@ -437,6 +485,7 @@ function Heap() {
           label="Enter an initial size for the heap"
           variant="outlined"
           helperText="Choose a number between 0 and 31."
+          value={listSize}
           onChange={handleChangeListSizeInput}
           error={!!listSize && !isListSizeValid}
           sx={{
