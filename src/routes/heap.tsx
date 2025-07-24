@@ -205,7 +205,7 @@ function Heap() {
       console.log('heap from getUpdatedHeap response', heap)
       // We need the user to heapify first. This populates the "Current heap" panel and allows other operations to complete successfully.
       if (endpoint !== endpoints.heap.heapify) {
-        setPreviousHeap(currentHeap)
+        setPreviousHeap([...currentHeap])
       } else {
         setHasHeapified(true)
       }
@@ -284,20 +284,21 @@ function Heap() {
     const renderArray: React.ReactElement[] = []
     let firstColumnIndex = 0
     let columnsInCurrentRow = 1
-    // DEV: We need to keep track of the original array indices of each node for the index prop that provides the label to the page element
-    // We want to do this without performing increment side-effects inside of the loops if possible
+    // We need to keep track of the original array indices of each node for the index prop that provides the label to the page element.
+    // We want to do this without performing increment side-effects inside of the loops if possible.
     // a. We could write formulas to determine the indices based on row number <-- X
     // b. We could simply map a new array at the beginning that holds the original indices. <-- this would be easier to understand and maintain
     const indexedHeapArray = heapArray.map((value, index) => ({
       index,
       value,
     }))
+    console.log('indexedHeapArray', indexedHeapArray)
     while (firstColumnIndex < indexedHeapArray.length) {
       const columns = indexedHeapArray.slice(
         firstColumnIndex,
         firstColumnIndex + columnsInCurrentRow
       )
-      // If we don't have enough elements to fill the current we have to push empty nodes for alignment purposes
+      // If we don't have enough elements to fill the current we have to push empty nodes for alignment purposes.
       // DEV: We can make empty nodes invisible?
       const populatedNodes = columns.map((element) => (
         <HeapNode
@@ -306,14 +307,14 @@ function Heap() {
           index={element.index}
         />
       ))
-      // Create another array of empty nodes here (the difference between nodes.length and columnsInCurrentRow) and add it to nodes
+      // Create another array of empty nodes (the difference between nodes.length and columnsInCurrentRow) and add it to nodes.
       const emptyNodes = []
       for (let i = 0; i < columnsInCurrentRow - populatedNodes.length; i++) {
         emptyNodes.push(
           <HeapNode
-            key={indexedHeapArray.length - 1 + i}
+            key={indexedHeapArray.length + i}
             label={' '}
-            index={indexedHeapArray.length - 1 + 1}
+            index={indexedHeapArray.length + i}
           />
         )
       }
@@ -329,18 +330,21 @@ function Heap() {
     setError(null)
   }
 
+  const emptyHeapMessage = 'The heap is empty.'
+  const initialPrompt = 'Click Get Raw List!'
+
   const heapPlaceholder = (
     <div className="heap-placeholder">
-      <Typography variant="subtitle2">The heap is empty.</Typography>
-      <Typography variant="subtitle2">Click Get Raw Heap!</Typography>
+      <Typography variant="subtitle2">{emptyHeapMessage}</Typography>
+      <Typography variant="subtitle2">{initialPrompt}</Typography>
     </div>
   )
 
   const currentHeapPlaceholder = (
     <div className="heap-placeholder">
-      <Typography variant="subtitle2">The heap is empty.</Typography>
+      <Typography variant="subtitle2">{emptyHeapMessage}</Typography>
       <Typography variant="subtitle2">
-        {previousHeap.length ? 'Choose a heap action!' : 'Click Get Raw Heap!'}
+        {previousHeap.length ? 'Choose a heap action!' : initialPrompt}
       </Typography>
     </div>
   )
@@ -477,6 +481,7 @@ function Heap() {
         onClose={handleCloseGetListDialog}
         title="Get Raw List"
         onSubmit={getList}
+        enableFieldAutofocus
       >
         <TextField
           autoFocus
@@ -518,6 +523,7 @@ function Heap() {
         onClose={handleCloseInsertValueDialog}
         title="Insert a Value"
         onSubmit={handleInsertHeapValue}
+        enableFieldAutofocus
       >
         <TextField
           autoFocus

@@ -15,6 +15,7 @@ interface DialogProps {
   children: React.ReactElement | React.ReactElement[]
   onSubmit: React.FormEventHandler<HTMLFormElement>
   description?: string | React.ReactElement | React.ReactElement[]
+  enableFieldAutofocus?: boolean
 }
 
 export default function FormDialog({
@@ -24,6 +25,7 @@ export default function FormDialog({
   children,
   onSubmit,
   description,
+  enableFieldAutofocus,
 }: DialogProps) {
   return (
     <Dialog
@@ -31,7 +33,7 @@ export default function FormDialog({
       onClose={onClose}
       maxWidth="sm"
       fullWidth
-      disableRestoreFocus // https://github.com/mui/material-ui/issues/33004#issuecomment-1455260156
+      disableRestoreFocus={enableFieldAutofocus} // https://github.com/mui/material-ui/issues/33004#issuecomment-1455260156
     >
       {title && <DialogTitle>{title}</DialogTitle>}
       <DialogContent sx={{ paddingBottom: 0 }}>
