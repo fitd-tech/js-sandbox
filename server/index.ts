@@ -167,6 +167,27 @@ app.post('/heap/extract-root', (req, res) => {
   buildHeapResponse(req, res, extractRoot)
 })
 
+app.post('/heap/update-node', (req, res) => {
+  console.log('someone hit /heap/update-node')
+  const { index, value } = req.body
+  if (index === undefined || Number.isNaN(index)) {
+    const errorData = {
+      error: 'Please submit a numeric value for the node index.',
+    }
+    res.status(400).json(errorData)
+  } else if (value === undefined || Number.isNaN(value)) {
+    const errorData = {
+      error: 'Please submit a numeric value for the new node value.',
+    }
+    res.status(400).json(errorData)
+  } else {
+    function updateNode() {
+      savedHeap.update(index, value)
+    }
+    buildHeapResponse(req, res, updateNode)
+  }
+})
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)
 })

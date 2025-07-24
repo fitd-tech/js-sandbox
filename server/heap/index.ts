@@ -75,7 +75,7 @@ export class Heap {
     if (originalValue === value) {
       return
     }
-    const siftFunc = this.getUpdateSiftFunc(value, originalValue)
+    const siftFunc = this.getUpdateSiftFunc(value, originalValue).bind(this) // bind this to maintain scope in returned function
     siftFunc(index)
   }
 
@@ -187,6 +187,7 @@ export class Heap {
 
   siftDown(index) {
     console.log('called siftDown')
+    console.log('index from siftDown', index)
     // Get the initial children
     let leftChild = this.getLeftChild(index)
     let rightChild = this.getRightChild(index)
@@ -429,7 +430,7 @@ export class Heap {
     })
   }
 
-  getUpdateSiftFunc(originalValue, newValue) {
+  getUpdateSiftFunc(newValue, originalValue) {
     /*
       Sift direction:
         MIN-HEAP

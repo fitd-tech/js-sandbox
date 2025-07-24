@@ -123,6 +123,9 @@ function Heap() {
   const [heapType, setHeapType] = useState('MIN')
   const [isInsertValueDialogOpen, setIsInsertValueDialogOpen] = useState(false)
   const [valueToInsert, setValueToInsert] = useState('')
+  const [isUpdateNodeDialogOpen, setIsUpdateNodeDialogOpen] = useState(false)
+  const [nodeIndexToUpdate, setNodeIndexToUpdate] = useState('')
+  const [nodeUpdateValue, setNodeUpdateValue] = useState('')
   const [isLoadingUnsortedHeap, setIsLoadingUnsortedHeap] = useState(false)
   const [isLoadingCurrentHeap, setIsLoadingCurrentHeap] = useState(false)
   const [actionName, setActionName] = useState<string | null>(null)
@@ -144,6 +147,26 @@ function Heap() {
       isValueToInsertNumber &&
       Number(valueToInsert) >= -1000 &&
       Number(valueToInsert) <= 1000
+  }
+  console.log('isValueToInsertValid', isValueToInsertValid)
+
+  let isNodeIndexToUpdateValid: boolean = true
+  const isNodeIndexToUpdateNumber = !Number.isNaN(nodeIndexToUpdate)
+  if (nodeIndexToUpdate) {
+    isNodeIndexToUpdateValid =
+      isNodeIndexToUpdateNumber &&
+      Number(nodeIndexToUpdate) >= -1000 &&
+      Number(nodeIndexToUpdate) <= 1000
+  }
+  console.log('isNodeIndexToUpdateValid', isNodeIndexToUpdateValid)
+
+  let isNodeUpdateValueValid: boolean = true
+  const isNodeUpdateValueNumber = !Number.isNaN(nodeUpdateValue)
+  if (nodeUpdateValue) {
+    isNodeUpdateValueValid =
+      isNodeUpdateValueNumber &&
+      Number(nodeUpdateValue) >= -1000 &&
+      Number(nodeUpdateValue) <= 1000
   }
   console.log('isValueToInsertValid', isValueToInsertValid)
 
@@ -232,6 +255,10 @@ function Heap() {
     setActionName('extract root')
   }, [getUpdatedHeap])
 
+  const handleClickUpdateNode = useCallback(() => {
+    setIsUpdateNodeDialogOpen(true)
+  }, [])
+
   const buttonConfig: ActionPanelButtons = useMemo(
     // DEV: This type isn't enforcing that unlisted object keys shouldn't be present
     () => [
@@ -255,6 +282,11 @@ function Heap() {
         disabled: !hasHeapified,
       },
       {
+        label: 'Update Node',
+        onClick: handleClickUpdateNode,
+        disabled: !hasHeapified,
+      },
+      {
         label: 'Home',
         to: '/',
       },
@@ -264,6 +296,7 @@ function Heap() {
       handleClickGetList,
       handleClickHeapify,
       handleClickInsert,
+      handleClickUpdateNode,
       hasHeapified,
       previousHeap.length,
     ]
@@ -356,6 +389,18 @@ function Heap() {
     setListSize(event.target.value)
   }
 
+  function handleChangeUpdateNodeIndexInput(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setNodeIndexToUpdate(event.target.value)
+  }
+
+  function handleChangeUpdateNodeValueInput(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    setNodeUpdateValue(event.target.value)
+  }
+
   function handleCloseGetListDialog() {
     setIsGetListDialogOpen(false)
   }
@@ -408,6 +453,33 @@ function Heap() {
     setIsInsertValueDialogOpen(false)
   }
 
+  const handleUpdateNode = useCallback(
+    async (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      if (!isNodeIndexToUpdateValid || !isNodeUpdateValueValid) {
+        return
+      }
+      const payload = {
+        index: Number(nodeIndexToUpdate),
+        value: Number(nodeUpdateValue),
+      }
+      await getUpdatedHeap(endpoints.heap.updateNode, payload)
+      setActionName('update node')
+      setIsUpdateNodeDialogOpen(false)
+    },
+    [
+      getUpdatedHeap,
+      isNodeIndexToUpdateValid,
+      isNodeUpdateValueValid,
+      nodeIndexToUpdate,
+      nodeUpdateValue,
+    ]
+  )
+
+  function handleCloseUpdateNodeDialog() {
+    setIsUpdateNodeDialogOpen(false)
+  }
+
   return (
     <>
       <Typography variant="h4" gutterBottom>
@@ -457,6 +529,7 @@ function Heap() {
                 flexDirection: 'column',
                 justifyContent: 'center',
                 alignItems: 'center',
+                gap: '10px',
               }}
             >
               {currentHeap.length
@@ -536,6 +609,39 @@ function Heap() {
           error={!!valueToInsert && !isValueToInsertValid}
           sx={{
             marginTop: '5px',
+          }}
+        />
+      </FormDialog>
+      <FormDialog
+        isOpen={isUpdateNodeDialogOpen}
+        onClose={handleCloseUpdateNodeDialog}
+        title="Update a Node"
+        onSubmit={handleUpdateNode}
+        enableFieldAutofocus
+      >
+        <TextField
+          autoFocus
+          required
+          id="update-node-index-input"
+          label="Enter the index of the node to update"
+          variant="outlined"
+          helperText={`Choose a number between 0 and ${currentHeap.length - 1}.`}
+          onChange={handleChangeUpdateNodeIndexInput}
+          error={!!nodeIndexToUpdate && !isNodeIndexToUpdateValid}
+          sx={{
+            marginTop: '5px',
+          }}
+        />
+        <TextField
+          required
+          id="update-node-value-input"
+          label="Enter a new value for the node"
+          variant="outlined"
+          helperText="Choose a number between -1000 and 1000."
+          onChange={handleChangeUpdateNodeValueInput}
+          error={!!nodeUpdateValue && !isNodeUpdateValueValid}
+          sx={{
+            marginTop: '15px',
           }}
         />
       </FormDialog>
