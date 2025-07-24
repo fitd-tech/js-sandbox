@@ -1,16 +1,9 @@
 import { useState, useMemo, useCallback } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import Alert from '@mui/material/Alert'
-import Dialog from '@mui/material/Dialog'
-import DialogTitle from '@mui/material/DialogTitle'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
-import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 
 import type { SelectChangeEvent } from '@mui/material/Select'
@@ -19,6 +12,8 @@ import ScrollList from '../components/ScrollList.tsx'
 import SortDurationInfo from '../components/SortDurationInfo.tsx'
 import { endpoints } from '../constants.ts'
 import ActionPanel from '../components/ActionPanel.tsx'
+import FormDialog from '../components/FormDialog.tsx'
+import TimedAlert from '../components/HeapInfo.tsx'
 
 export const Route = createFileRoute('/sort')({
   component: Sort,
@@ -38,6 +33,7 @@ function Sort() {
   const [sortEndpoint, setSortEndpoint] = useState<string | null>(null)
   const [sortName, setSortName] = useState<string | null>(null)
   const [isLoadingSortedList, setIsLoadingSortedList] = useState(false)
+  const [shouldDisplayInfoAlert, setShouldDisplayInfoAlert] = useState(false)
   const [sortedList, setSortedList] = useState<number[]>([])
   const [duration, setDuration] = useState(null)
   const [error, setError] = useState<string | null>(null)
@@ -139,6 +135,7 @@ function Sort() {
     const { list: sortedList, duration } = await response.json()
     setSortedList(sortedList)
     setDuration(duration)
+    setShouldDisplayInfoAlert(true)
     setIsLoadingSortedList(false)
   }
 
@@ -276,6 +273,10 @@ function Sort() {
     ]
   )
 
+  function handleCloseInfoAlert() {
+    setShouldDisplayInfoAlert(false)
+  }
+
   return (
     <>
       <Typography variant="h4" gutterBottom>
@@ -313,53 +314,50 @@ function Sort() {
             duration={duration}
             sortName={sortName}
           />
+          <TimedAlert
+            severity="success"
+            isLoading={isLoadingSortedList}
+            isOpen={shouldDisplayInfoAlert}
+            onClose={handleCloseInfoAlert}
+          >
+            {`Performed ${sortName}`}
+          </TimedAlert>
+          <div>
+            {error && (
+              <Alert
+                severity="error"
+                variant="filled"
+                onClose={handleClickCloseErrorAlert}
+              >
+                {error}
+              </Alert>
+            )}
+          </div>
         </div>
       </ActionPanel>
-      {error && (
-        <Alert
-          severity="error"
-          variant="filled"
-          onClose={handleClickCloseErrorAlert}
-        >
-          {error}
-        </Alert>
-      )}
-      <Dialog
-        open={isGetListDialogOpen}
+      <FormDialog
+        isOpen={isGetListDialogOpen}
         onClose={handleCloseGetListDialog}
-        maxWidth="sm"
-        fullWidth
+        title="Get List"
+        contentText="Choose a list size."
+        onSubmit={getList}
       >
-        <DialogTitle>Get List</DialogTitle>
-        <DialogContent sx={{ paddingBottom: 0 }}>
-          <DialogContentText sx={{ paddingBottom: '10px' }}>
-            Choose a list size.
-          </DialogContentText>
-          <form onSubmit={getList}>
-            <FormControl fullWidth>
-              <InputLabel id="list-size-select-label">Size</InputLabel>
-              <Select
-                labelId="list-size-select-label"
-                id="list-size-select"
-                value={listSize}
-                label="Size"
-                onChange={handleChangeListSize}
-              >
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={100}>100</MenuItem>
-                <MenuItem value={1000}>1,000</MenuItem>
-                <MenuItem value={10000}>10,000</MenuItem>
-                <MenuItem value={100000}>100,000</MenuItem>
-                <MenuItem value={1000000}>1,000,000</MenuItem>
-              </Select>
-            </FormControl>
-            <DialogActions>
-              <Button onClick={handleCloseGetListDialog}>Cancel</Button>
-              <Button type="submit">Ok</Button>
-            </DialogActions>
-          </form>
-        </DialogContent>
-      </Dialog>
+        <InputLabel id="list-size-select-label">Size</InputLabel>
+        <Select
+          labelId="list-size-select-label"
+          id="list-size-select"
+          value={listSize}
+          label="Size"
+          onChange={handleChangeListSize}
+        >
+          <MenuItem value={10}>10</MenuItem>
+          <MenuItem value={100}>100</MenuItem>
+          <MenuItem value={1000}>1,000</MenuItem>
+          <MenuItem value={10000}>10,000</MenuItem>
+          <MenuItem value={100000}>100,000</MenuItem>
+          <MenuItem value={1000000}>1,000,000</MenuItem>
+        </Select>
+      </FormDialog>
     </>
   )
 }

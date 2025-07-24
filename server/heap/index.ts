@@ -343,6 +343,7 @@ export class Heap {
     // )
   }
 
+  // DEV: This is not currently functioning
   // DEV: This should be recursive to traverse all children
   validateHeap() {
     console.log('called validateHeap')

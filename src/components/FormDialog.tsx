@@ -3,18 +3,18 @@ import {
   Dialog,
   DialogActions,
   DialogContent,
+  DialogContentText,
   DialogTitle,
   FormControl,
-  Typography,
 } from '@mui/material'
 
 interface DialogProps {
   isOpen: boolean
   onClose: React.MouseEventHandler<HTMLButtonElement>
   title?: string
+  contentText?: string | React.ReactElement | React.ReactElement[]
   children: React.ReactElement | React.ReactElement[]
   onSubmit: React.FormEventHandler<HTMLFormElement>
-  description?: string | React.ReactElement | React.ReactElement[]
   enableFieldAutofocus?: boolean
 }
 
@@ -22,9 +22,9 @@ export default function FormDialog({
   isOpen,
   onClose,
   title,
+  contentText,
   children,
   onSubmit,
-  description,
   enableFieldAutofocus,
 }: DialogProps) {
   return (
@@ -37,8 +37,10 @@ export default function FormDialog({
     >
       {title && <DialogTitle>{title}</DialogTitle>}
       <DialogContent sx={{ paddingBottom: 0 }}>
-        {description && (
-          <Typography sx={{ marginBottom: '20px' }}>{description}</Typography>
+        {contentText && (
+          <DialogContentText sx={{ marginBottom: '20px' }}>
+            {contentText}
+          </DialogContentText>
         )}
         <form onSubmit={onSubmit}>
           <FormControl fullWidth>{children}</FormControl>

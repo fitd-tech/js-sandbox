@@ -14,8 +14,8 @@ import ActionPanel, {
   type ActionPanelButtons,
 } from '../components/ActionPanel.tsx'
 import { endpoints } from '../constants.ts'
-import HeapInfo from '../components/HeapInfo.tsx'
 import FormDialog from '../components/FormDialog.tsx'
+import TimedAlert from '../components/HeapInfo.tsx'
 
 // const LIST_SIZE = 31
 const PAGE_SIZE = 31
@@ -480,6 +480,10 @@ function Heap() {
     setIsUpdateNodeDialogOpen(false)
   }
 
+  function handleCloseInfoAlert() {
+    setActionName(null)
+  }
+
   return (
     <>
       <Typography variant="h4" gutterBottom>
@@ -537,7 +541,14 @@ function Heap() {
                 : currentHeapPlaceholder}
             </div>
           </div>
-          <HeapInfo isLoading={isLoadingCurrentHeap} actionName={actionName} />
+          <TimedAlert
+            severity="success"
+            isLoading={isLoadingCurrentHeap}
+            isOpen={!!actionName}
+            onClose={handleCloseInfoAlert}
+          >
+            {`Performed ${actionName}`}
+          </TimedAlert>
         </div>
       </ActionPanel>
       {error && (
@@ -576,7 +587,7 @@ function Heap() {
         onClose={handleCloseHeapifyDialog}
         title="Heapify"
         onSubmit={handleHeapify}
-        description="Choose the type of heap you want to generate. A min-heap has the
+        contentText="Choose the type of heap you want to generate. A min-heap has the
           lowest value at the root, and a max-heap has the highest."
       >
         <InputLabel id="heap-type-select-label">Type</InputLabel>

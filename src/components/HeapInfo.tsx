@@ -1,19 +1,38 @@
-import { Typography } from '@mui/material'
+import { useEffect } from 'react'
+import { Alert } from '@mui/material'
 
 interface HeapInfoProps {
-  isLoading: boolean
-  actionName: string | null
+  severity: string
+  isLoading?: boolean
+  isOpen: boolean
+  onClose: () => void
+  children: React.ReactElement | React.ReactElement[] | string
 }
 
-export default function HeapInfo({ isLoading, actionName }: HeapInfoProps) {
-  let content
-  if (isLoading) {
-    content = `Loading ${actionName}...`
-  } else if (actionName) {
-    content = `Performed ${actionName}`
-  } else {
-    content = null
-  }
+export default function TimedAlert({
+  isLoading,
+  isOpen,
+  onClose,
+  children,
+}: HeapInfoProps) {
+  useEffect(() => {
+    if (isOpen) {
+      setTimeout(() => {
+        onClose()
+      }, 3000)
+    }
+  }, [isOpen, onClose])
 
-  return <Typography variant="subtitle2">{content}</Typography>
+  return !isLoading && !!isOpen ? (
+    <Alert
+      severity="success"
+      variant="outlined"
+      onClose={onClose}
+      sx={{
+        marginTop: '10px',
+      }}
+    >
+      {children}
+    </Alert>
+  ) : null
 }
