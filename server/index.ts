@@ -17,7 +17,7 @@ const port = 3000
 app.use(cors())
 app.use(express.json({ limit: '50mb' }))
 
-const LIST_SIZE_LIMIT = 1000000
+const LIST_SIZE_LIMIT = 1000000000
 
 let savedList: number[] = []
 let savedSortedList: number[] = []

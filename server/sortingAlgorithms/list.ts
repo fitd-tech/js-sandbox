@@ -1,4 +1,5 @@
 export default function createList(length) {
+  console.log('length from createList', length)
   const list: number[] = []
   const size = length || 10000
   let count = 0

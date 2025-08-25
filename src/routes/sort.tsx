@@ -380,6 +380,9 @@ function Sort() {
           <MenuItem value={10000}>10,000</MenuItem>
           <MenuItem value={100000}>100,000</MenuItem>
           <MenuItem value={1000000}>1,000,000</MenuItem>
+          <MenuItem value={10000000}>10,000,000</MenuItem>
+          {/* <MenuItem value={100000000}>100,000,000</MenuItem> */}
+          {/* <MenuItem value={1000000000}>1,000,000,000</MenuItem> */}
         </Select>
       </FormDialog>
     </>
