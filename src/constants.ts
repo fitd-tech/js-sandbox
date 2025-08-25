@@ -11,4 +11,5 @@ export const endpoints = {
   insertionSortIntuited: '/insertion-sort/intuited/',
   mergeSortIntuited: '/merge-sort/intuited',
   heapSortIntuited: '/heap-sort/intuited',
+  quickSortIntuited: '/quick-sort/intuited',
 }

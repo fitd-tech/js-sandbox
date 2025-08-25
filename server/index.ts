@@ -9,6 +9,7 @@ import { paginate } from './sortingAlgorithms/utility/pagination.ts'
 import { getPerformanceDuration } from './sortingAlgorithms/utility/performance.ts'
 import { heapSortIntuited } from './sortingAlgorithms/algorithms/heapSortIntuited.ts'
 import { Heap, HEAP_TYPES } from './heap/index.ts'
+import { quickSortIntuited } from './sortingAlgorithms/algorithms/quickSortIntuited.ts'
 
 const app = express()
 const port = 3000
@@ -106,6 +107,11 @@ app.post('/merge-sort/intuited', (req, res) => {
 app.post('/heap-sort/intuited', (req, res) => {
   console.log('someone hit /heap-sort/intuited')
   buildSortResponse(req, res, heapSortIntuited)
+})
+
+app.post('/quick-sort/intuited', (req, res) => {
+  console.log('someone hit /quick-sort/intuited')
+  buildSortResponse(req, res, quickSortIntuited)
 })
 
 // HEAP DATA SCTRUCTURE

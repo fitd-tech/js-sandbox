@@ -169,6 +169,12 @@ function Sort() {
     setSortName('Heap Sort')
   }, [])
 
+  const handleClickQuickSortIntuited = useCallback(() => {
+    getSortedList(endpoints.quickSortIntuited)
+    setSortEndpoint(endpoints.quickSortIntuited)
+    setSortName('Quick Sort')
+  }, [])
+
   function getMoreSortedList() {
     if (sortEndpoint !== null) {
       getMore(sortEndpoint, setSortedList, sortedListPage, setSortedListPage)
@@ -218,6 +224,7 @@ function Sort() {
           </>
         ),
         onClick: handleClickSelectionSortIntuited,
+        disabled: !list.length,
       },
       {
         label: (
@@ -228,6 +235,7 @@ function Sort() {
           </>
         ),
         onClick: handleClickBubbleSortIntuited,
+        disabled: !list.length,
       },
       {
         label: (
@@ -238,6 +246,7 @@ function Sort() {
           </>
         ),
         onClick: handleClickInsertionSortIntuited,
+        disabled: !list.length,
       },
       {
         label: (
@@ -248,6 +257,7 @@ function Sort() {
           </>
         ),
         onClick: handleClickMergeSortIntuited,
+        disabled: !list.length,
       },
       {
         label: (
@@ -258,6 +268,18 @@ function Sort() {
           </>
         ),
         onClick: handleClickHeapSortIntuited,
+        disabled: !list.length,
+      },
+      {
+        label: (
+          <>
+            Quick Sort
+            <br />
+            (testing in progress)
+          </>
+        ),
+        onClick: handleClickQuickSortIntuited,
+        disabled: !list.length,
       },
       {
         label: 'Home',
@@ -269,7 +291,9 @@ function Sort() {
       handleClickHeapSortIntuited,
       handleClickInsertionSortIntuited,
       handleClickMergeSortIntuited,
+      handleClickQuickSortIntuited,
       handleClickSelectionSortIntuited,
+      list.length,
     ]
   )
 
