@@ -275,7 +275,7 @@ function Sort() {
           <>
             Quick Sort
             <br />
-            (testing in progress)
+            (intuited)
           </>
         ),
         onClick: handleClickQuickSortIntuited,
