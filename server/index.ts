@@ -10,6 +10,10 @@ import { getPerformanceDuration } from './sortingAlgorithms/utility/performance.
 import { heapSortIntuited } from './sortingAlgorithms/algorithms/heapSortIntuited.ts'
 import { Heap, HEAP_TYPES } from './heap/index.ts'
 import { quickSortIntuited } from './sortingAlgorithms/algorithms/quickSortIntuited.ts'
+import {
+  checkSortedList,
+  LIST_DIRECTION,
+} from './sortingAlgorithms/utility/quality.ts'
 
 const app = express()
 const port = 3000
@@ -57,7 +61,7 @@ app.post('/list', (req, res) => {
 // SORTING ALGORITHMS
 
 function buildSortResponse(req, res, sortFunc) {
-  const { pageSize, page } = req.body
+  const { pageSize, page, options } = req.body
   console.log('req.body', req.body)
   if (pageSize === undefined) {
     const errorData = {
@@ -66,8 +70,14 @@ function buildSortResponse(req, res, sortFunc) {
     res.status(400).json(errorData)
   } else if (page === undefined) {
     const { result: sortedList, duration } = getPerformanceDuration(() =>
-      sortFunc(savedList)
+      sortFunc(savedList, options)
     )
+    const listIsSorted = checkSortedList(sortedList, LIST_DIRECTION.ASCENDING)
+    if (!listIsSorted) {
+      console.error('ERROR: List failed sort check.')
+    } else {
+      console.log('SUCCESS: List is properly sorted!')
+    }
     savedSortedList = sortedList
     const paginationOptions = {
       pageSize,
@@ -77,6 +87,7 @@ function buildSortResponse(req, res, sortFunc) {
       ...paginate(savedSortedList, paginationOptions),
       duration,
     }
+    console.log('savedList from buildSortResponse', savedList)
     console.log('data', data)
     res.json(data)
   } else {

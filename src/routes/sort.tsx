@@ -14,6 +14,15 @@ import { endpoints } from '../constants.ts'
 import ActionPanel from '../components/ActionPanel.tsx'
 import FormDialog from '../components/FormDialog.tsx'
 import TimedAlert from '../components/HeapInfo.tsx'
+import { PIVOT_PLACEMENT } from '../../server/sortingAlgorithms/algorithms/quickSortIntuited.ts'
+import type { PivotPlacementOption } from '../../server/sortingAlgorithms/algorithms/quickSortIntuited.ts'
+
+interface GetSortedListPayload {
+  pageSize: number
+  options?: {
+    pivotPlacement?: PivotPlacementOption
+  }
+}
 
 export const Route = createFileRoute('/sort')({
   component: Sort,
@@ -32,6 +41,10 @@ function Sort() {
   const [hasMorePages, setHasMorePages] = useState(false)
   const [sortEndpoint, setSortEndpoint] = useState<string | null>(null)
   const [sortName, setSortName] = useState<string | null>(null)
+  const [isQuickSortDialogOpen, setIsQuickSortDialogOpen] = useState(false)
+  const [quickSortPivotPlacement, setQuickSortPivotPlacement] = useState<
+    PivotPlacementOption | ''
+  >('')
   const [isLoadingSortedList, setIsLoadingSortedList] = useState(false)
   const [shouldDisplayInfoAlert, setShouldDisplayInfoAlert] = useState(false)
   const [sortedList, setSortedList] = useState<number[]>([])
@@ -42,9 +55,11 @@ function Sort() {
     setIsGetListDialogOpen(true)
   }
 
-  async function getList(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsGetListDialogOpen(false)
+  function handleClickQuickSortIntuited() {
+    setIsQuickSortDialogOpen(true)
+  }
+
+  async function getList() {
     setError(null)
     setIsLoadingList(true)
     setDuration(null)
@@ -116,64 +131,82 @@ function Sort() {
     getMore(endpoints.list, setList, listPage, setListPage)
   }
 
-  async function getSortedList(endpoint: string) {
-    setIsLoadingSortedList(true)
-    setDuration(null)
-    const data = {
-      pageSize: PAGE_SIZE,
-    }
-    const response = await fetch(
-      `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
+  const getSortedList = useCallback(
+    async (endpoint: string) => {
+      setIsLoadingSortedList(true)
+      setDuration(null)
+      const data: GetSortedListPayload = {
+        pageSize: PAGE_SIZE,
       }
-    )
-    const { list: sortedList, duration } = await response.json()
-    setSortedList(sortedList)
-    setDuration(duration)
-    setShouldDisplayInfoAlert(true)
-    setIsLoadingSortedList(false)
+      if (endpoint === endpoints.quickSortIntuited) {
+        data.options = {}
+        data.options.pivotPlacement = quickSortPivotPlacement
+      }
+      const response = await fetch(
+        `${import.meta.env.VITE_BACKEND_URL}${endpoint}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(data),
+        }
+      )
+      const { list: sortedList, duration } = await response.json()
+      setSortedList(sortedList)
+      setDuration(duration)
+      setShouldDisplayInfoAlert(true)
+      setIsLoadingSortedList(false)
+    },
+    [quickSortPivotPlacement]
+  )
+
+  function handleSubmitGetListDialog(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsGetListDialogOpen(false)
+    getList()
   }
 
   const handleClickSelectionSortIntuited = useCallback(() => {
     getSortedList(endpoints.selectionSortIntuited)
     setSortEndpoint(endpoints.selectionSortIntuited)
     setSortName('Selection Sort')
-  }, [])
+  }, [getSortedList])
 
   const handleClickBubbleSortIntuited = useCallback(() => {
     getSortedList(endpoints.bubbleSortIntuited)
     setSortEndpoint(endpoints.bubbleSortIntuited)
     setSortName('Bubble Sort')
-  }, [])
+  }, [getSortedList])
 
   const handleClickInsertionSortIntuited = useCallback(() => {
     getSortedList(endpoints.insertionSortIntuited)
     setSortEndpoint(endpoints.insertionSortIntuited)
     setSortName('Insertion Sort')
-  }, [])
+  }, [getSortedList])
 
   const handleClickMergeSortIntuited = useCallback(() => {
     getSortedList(endpoints.mergeSortIntuited)
     setSortEndpoint(endpoints.mergeSortIntuited)
     setSortName('Merge Sort')
-  }, [])
+  }, [getSortedList])
 
   const handleClickHeapSortIntuited = useCallback(() => {
     getSortedList(endpoints.heapSortIntuited)
     setSortEndpoint(endpoints.heapSortIntuited)
     setSortName('Heap Sort')
-  }, [])
+  }, [getSortedList])
 
-  const handleClickQuickSortIntuited = useCallback(() => {
-    getSortedList(endpoints.quickSortIntuited)
-    setSortEndpoint(endpoints.quickSortIntuited)
-    setSortName('Quick Sort')
-  }, [])
+  const handleSubmitQuickSortIntuited = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault()
+      setIsQuickSortDialogOpen(false)
+      getSortedList(endpoints.quickSortIntuited)
+      setSortEndpoint(endpoints.quickSortIntuited)
+      setSortName('Quick Sort')
+    },
+    [getSortedList]
+  )
 
   function getMoreSortedList() {
     if (sortEndpoint !== null) {
@@ -191,6 +224,13 @@ function Sort() {
 
   function handleChangeListSize(event: SelectChangeEvent) {
     setListSize(event.target.value as string)
+  }
+  function handleChangeQuickSortPivotPlacement(event: SelectChangeEvent) {
+    setQuickSortPivotPlacement(event.target.value as PivotPlacementOption)
+  }
+
+  function handleCloseQuickSortDialog() {
+    setIsQuickSortDialogOpen(false)
   }
 
   const listPlaceholder = (
@@ -291,7 +331,6 @@ function Sort() {
       handleClickHeapSortIntuited,
       handleClickInsertionSortIntuited,
       handleClickMergeSortIntuited,
-      handleClickQuickSortIntuited,
       handleClickSelectionSortIntuited,
       list.length,
     ]
@@ -364,7 +403,7 @@ function Sort() {
         onClose={handleCloseGetListDialog}
         title="Get List"
         contentText="Choose a list size."
-        onSubmit={getList}
+        onSubmit={handleSubmitGetListDialog}
       >
         <InputLabel id="list-size-select-label">Size</InputLabel>
         <Select
@@ -383,6 +422,35 @@ function Sort() {
           <MenuItem value={10000000}>10,000,000</MenuItem>
           {/* <MenuItem value={100000000}>100,000,000</MenuItem> */}
           {/* <MenuItem value={1000000000}>1,000,000,000</MenuItem> */}
+        </Select>
+      </FormDialog>
+      <FormDialog
+        isOpen={isQuickSortDialogOpen}
+        onClose={handleCloseQuickSortDialog}
+        title="Quick Sort"
+        contentText="Choose options for the sort."
+        onSubmit={handleSubmitQuickSortIntuited}
+      >
+        <InputLabel id="quick-set-pivot-placement-select-label">
+          Pivot placement
+        </InputLabel>
+        <Select
+          labelId="quick-sort-pivot-placement-select-label"
+          id="quick-sort-pivot-placement-select"
+          value={quickSortPivotPlacement}
+          label="Pivot placement"
+          onChange={handleChangeQuickSortPivotPlacement}
+        >
+          <MenuItem value={PIVOT_PLACEMENT.START}>
+            {PIVOT_PLACEMENT.START}
+          </MenuItem>
+          <MenuItem value={PIVOT_PLACEMENT.MIDDLE}>
+            {PIVOT_PLACEMENT.MIDDLE}
+          </MenuItem>
+          <MenuItem value={PIVOT_PLACEMENT.END}>{PIVOT_PLACEMENT.END}</MenuItem>
+          <MenuItem value={PIVOT_PLACEMENT.MEDIAN}>
+            {PIVOT_PLACEMENT.MEDIAN}
+          </MenuItem>
         </Select>
       </FormDialog>
     </>
