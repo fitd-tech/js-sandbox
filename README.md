@@ -20,5 +20,5 @@ To run the backend server:
 
 ```
 cd server
-node --experimental-strip-types index.ts
+npx tsx index.ts
 ```
