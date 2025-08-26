@@ -22,3 +22,5 @@ To run the backend server:
 cd server
 npx tsx index.ts
 ```
+
+Reference: https://tsx.is/
